@@ -25,8 +25,8 @@ class M1(LoadableModel):
     '''
     @store_config_args
     def __init__(self,
-                 input_shape,
-                 src_feats,
+                 input_spatial_dims,
+                 input_channels,
                  num_classes,
                  dropout_rate       =   0.10,  
                  dropout_mode       =  'standard',    
@@ -43,11 +43,11 @@ class M1(LoadableModel):
                  anatomical_prior   =   False):
 
         # Ensure Correct Dimensionality
-        ndims = len(input_shape)
+        ndims = len(input_spatial_dims)
         assert ndims in [1, 2, 3], 'ndims should be one of 1, 2, or 3. found: %d' % ndims
     
         # Input Layer Definition
-        source = tf.keras.Input(shape=(*input_shape, src_feats+1 if anatomical_prior else src_feats), name='input_image')
+        source = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='input_image')
 
         # Standard Single-Stage Model
         if not cascaded:            
