@@ -17,15 +17,15 @@ unet_model = models.networks.M1(input_spatial_dims =  (18,192,192),
                                 input_channels     =   3,
                                 num_classes        =   2,                       
                                 filters            =  (32,64,128,256,512),   
-                                strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,1,1)),                         
+                                strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,1,1)),  
                                 dropout_rate       =   0.50,       
                                 dropout_mode       =  'standard',
                                 se_reduction       =  (8,8,8,8,8),
                                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
                                 kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
-                                bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),   
+                                bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),
                                 kernel_regularizer =   tf.keras.regularizers.l2(1e-5),
-                                bias_regularizer   =   tf.keras.regularizers.l2(1e-5),                                               
+                                bias_regularizer   =   tf.keras.regularizers.l2(1e-5),     
                                 cascaded           =   False)  
 
 # Enable Multi-GPU Support
