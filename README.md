@@ -22,11 +22,11 @@ unet_model = models.networks.M1(input_spatial_dims =  (18,192,192),
                                 dropout_mode       =  'standard',
                                 se_reduction       =  (8,8,8,8,8),
                                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
-                                kernel_initializer =  tf.keras.initializers.Orthogonal(gain=1.0), 
-                                bias_initializer   =  tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),   
-                                kernel_regularizer =  tf.keras.regularizers.l2(1e-5),
-                                bias_regularizer   =  tf.keras.regularizers.l2(1e-5),                                               
-                                cascaded           =  False)  
+                                kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
+                                bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),   
+                                kernel_regularizer =   tf.keras.regularizers.l2(1e-5),
+                                bias_regularizer   =   tf.keras.regularizers.l2(1e-5),                                               
+                                cascaded           =   False)  
 
 # Enable Multi-GPU Support
 unet_model = tf.keras.utils.multi_gpu_model(unet_model, gpus=2)
