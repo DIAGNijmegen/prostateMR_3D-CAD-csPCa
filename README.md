@@ -7,6 +7,8 @@
   ● Attention U-Net: https://github.com/ozan-oktay/Attention-Gated-Networks  
   ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
 
+<kbd>![schematic](docs/image.png)</kbd>
+
 **Model Setup Example in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/cnn) )*
 ```python
