@@ -1,6 +1,6 @@
 # Clinically Significant Prostate Cancer Detection in bpMRI
 
-**Note**: This repo is currently under construction. It shares the open-source TensorFlow 2.4 version of the Dual Attention U-Net (*M1*) and SEResNet (*M2*) models, detailed in the publications listed below. Code (and the anatomical prior) used for training these models have a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. To infer lesion predictions on testing samples using the pre-trained variant of the algorithm, please visit: https://grand-challenge.org/algorithms/prostate-mri-cad-cspca/ 
+**Note**: This repo is continually updated. It shares the open-source TensorFlow 2.4 version of the Dual Attention U-Net (*M1*) and SEResNet (*M2*) models, detailed in the publications listed below. Code (and the anatomical prior) used for training these models have a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. To infer lesion predictions on testing samples using the pre-trained variant of the algorithm, please visit: https://grand-challenge.org/algorithms/prostate-mri-cad-cspca/ 
 
 **Related U-Net Architectures:**  
   ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
