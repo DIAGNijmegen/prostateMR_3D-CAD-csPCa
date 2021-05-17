@@ -9,10 +9,9 @@ Script:         Model Definition
 Contributor:    anindox8
 Target Organ:   Prostate
 Target Classes: Benign(0), Malignant(1)
-Update:         13/05/2021
+Update:         17/05/2021
 
 '''
-
 
 
 # Dual-Attention U-Net for PCa Detection ------------------------------------------------------------------------------------------------------------------------------
@@ -47,12 +46,12 @@ class M1(LoadableModel):
         # Ensure Correct Dimensionality
         ndims = len(input_spatial_dims)
         assert ndims in [1, 2, 3], 'ndims should be one of 1, 2, or 3. found: %d' % ndims
-        
+    
+        # Input Layer Definition
+        source = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='input_image')
+
         # Standard Single-Stage Model
-        if not cascaded:
-            # Input Layer Definition
-            source      = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='input_image')
-            
+        if not cascaded:            
             # Dual-Attention U-Net Model Definition
             m1_model    = m1(inputs             =  source, 
                              num_classes        =  num_classes, 
@@ -77,45 +76,41 @@ class M1(LoadableModel):
             self.cascaded             = cascaded
 
         # Cascaded Two-Stage Model
-        else:
-            # Input Layers Definition
-            source_v1   = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='visit_1_image')
-            source_v2   = tf.keras.Input(shape=(*input_spatial_dims, input_channels),                                           name='visit_2_image')
-            
+        else:            
             # First-Stage Dual-Attention U-Net Model Definition
-            m1_stage1   = m1(inputs             =  source_v1, 
+            m1_stage1   = m1(inputs             =  source, 
                              num_classes        =  num_classes, 
                              dropout_mode       =  dropout_mode,
                              dropout_rate       =  dropout_rate,          
                              filters            = [x//2 for x in filters],            
-                             strides            =  strides,
-                             kernel_sizes       =  kernel_sizes,            
+                             strides            =  strides, 
+                             kernel_sizes       =  kernel_sizes,           
                              se_reduction       =  se_reduction,          
                              att_sub_samp       =  att_sub_samp,                   
                              kernel_initializer =  kernel_initializer,    
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
-                             target_tensor_name = 'visit_1_label')
+                             target_tensor_name = 'stage_1_label')
 
             # Second-Stage Dual-Attention U-Net Model Definition
             m1_stage2   = m1(inputs             =  tf.keras.layers.concatenate([tf.expand_dims(
-                                                   m1_stage1['y_softmax'][:,:,:,:,1],axis=-1), source_v2], axis=-1), 
+                                                   m1_stage1['y_softmax'][:,:,:,:,1],axis=-1), source], axis=-1), 
                              num_classes        =  num_classes, 
                              dropout_rate       =  dropout_rate, 
                              dropout_mode       =  dropout_mode,         
-                             filters            = [x//2 for x in filters],            
-                             strides            =  strides,  
-                             kernel_sizes       =  kernel_sizes,          
+                             filters            =  filters,            
+                             strides            =  strides,
+                             kernel_sizes       =  kernel_sizes,            
                              se_reduction       =  se_reduction,          
                              att_sub_samp       =  att_sub_samp,               
                              kernel_initializer =  kernel_initializer,    
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
-                             target_tensor_name = 'visit_2_label')
+                             target_tensor_name = 'stage_2_label')
     
-            super().__init__(name='cad', inputs=[source_v1, source_v2], outputs=[m1_stage1['logits'], m1_stage2['logits']])
+            super().__init__(name='cad', inputs=[source], outputs=[m1_stage1['logits'], m1_stage2['logits']])
     
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
