@@ -358,7 +358,6 @@ def m1(inputs, num_classes,
 
     # Final Convolutional Layer [Logits] + Softmax/Argmax
     y__         = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), name=target_tensor_name, **conv_params)(uconv0)
-    y_prob      = tf.nn.softmax(y__)
     y_          = tf.argmax(y__, axis=-1) \
                         if num_classes>1  \
                         else tf.cast(tf.greater_equal(y__[..., 0], 0.5), tf.int32)
@@ -382,7 +381,7 @@ def m1(inputs, num_classes,
     
     outputs['pre_logits'] = uconv0
     outputs['logits']     = y__
-    outputs['y_softmax']  = y_prob    
+    outputs['y_softmax']  = tf.keras.activations.softmax(y__)    
     outputs['y_sigmoid']  = tf.keras.activations.sigmoid(y__)    
     outputs['y_']         = y_
 
