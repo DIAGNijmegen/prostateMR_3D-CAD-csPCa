@@ -28,9 +28,6 @@ unet_model = models.networks.M1(input_spatial_dims =  (18,192,192),
                                 bias_regularizer   =   tf.keras.regularizers.l2(1e-5),     
                                 cascaded           =   False)  
 
-# Enable Multi-GPU Support
-unet_model = tf.keras.utils.multi_gpu_model(unet_model, gpus=2)
-
 # Compile Model w/ Optimizer and Loss Function(s)
 unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=1e-4, amsgrad=True), 
                    loss      = models.losses.Focal(alpha=0.75, gamma=2.00).loss)
