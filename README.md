@@ -37,6 +37,9 @@ unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=1e-4, amsgrad=True),
 
 # Display Model Summary
 unet_model.summary()
+
+# Train Model
+unet_model.fit(...)
 ```
 
 **Related Publications:**  
