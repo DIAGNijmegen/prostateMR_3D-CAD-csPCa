@@ -37,8 +37,8 @@ class M1(LoadableModel):
                  att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),      
                  kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0, seed=8),
                  bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
-                 kernel_regularizer =   tf.keras.regularizers.l2(1e-5),
-                 bias_regularizer   =   tf.keras.regularizers.l2(1e-5),         
+                 kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+                 bias_regularizer   =   tf.keras.regularizers.l2(1e-4),         
                  label_encoding     =  'one_hot',
                  cascaded           =   False,
                  anatomical_prior   =   False):
@@ -283,8 +283,8 @@ def m1(inputs, num_classes,
        att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
        kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0, seed=8),
        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
-       kernel_regularizer =   tf.keras.regularizers.l2(1e-5),
-       bias_regularizer   =   tf.keras.regularizers.l2(1e-5),
+       kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+       bias_regularizer   =   tf.keras.regularizers.l2(1e-4),
        target_tensor_name =  'detection_label',
        summary            =   True):
     """

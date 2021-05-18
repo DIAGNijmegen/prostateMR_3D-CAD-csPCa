@@ -27,8 +27,8 @@ unet_model = models.networks.M1(input_spatial_dims =  (18,192,192),
                                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
                                 kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
                                 bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),
-                                kernel_regularizer =   tf.keras.regularizers.l2(1e-5),
-                                bias_regularizer   =   tf.keras.regularizers.l2(1e-5),     
+                                kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+                                bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
                                 cascaded           =   False)  
 
 # Compile Model w/ Optimizer and Loss Function(s)
