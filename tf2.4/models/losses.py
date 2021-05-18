@@ -25,7 +25,7 @@ class Focal:
         self.encoding          = label_encoding
 
     def loss(self, y_true, y_pred):
-        if (self.encoding=='one_hot'):    y_pred = tf.math.add(tf.nn.softmax(y_pred), 1e-9) 
+        if (self.encoding=='one_hot'):    y_pred = tf.keras.activations.softmax(y_pred) 
         elif (self.encoding=='ordinal'):  y_pred = tf.keras.activations.sigmoid(y_pred)
 
         ce                 = tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
@@ -43,7 +43,7 @@ class Weighted_Categorical_CE:
         self.encoding     =  label_encoding
             
     def loss(self, y_true, y_pred):
-        if (self.encoding=='one_hot'):    y_pred = tf.nn.softmax(y_pred)
+        if (self.encoding=='one_hot'):    y_pred = tf.keras.activations.softmax(y_pred)
         elif (self.encoding=='ordinal'):  y_pred = tf.keras.activations.sigmoid(y_pred)
 
         weights       =  tf.convert_to_tensor(self.weights, dtype=tf.float32)

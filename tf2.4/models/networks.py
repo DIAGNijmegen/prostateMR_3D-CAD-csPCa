@@ -41,11 +41,12 @@ class M1(LoadableModel):
                  bias_regularizer   =   tf.keras.regularizers.l2(1e-4),         
                  label_encoding     =  'one_hot',
                  cascaded           =   False,
-                 anatomical_prior   =   False):
+                 anatomical_prior   =   False,
+                 name               =  'cad'):
 
         # Ensure Correct Dimensionality
         ndims = len(input_spatial_dims)
-        assert ndims in [1, 2, 3], 'ndims should be one of 1, 2, or 3. found: %d' % ndims
+        assert ndims in [1,2,3], 'Variable (ndims) should be 1,2 or 3. Found: %d.'%ndims
     
         # Input Layer Definition
         source = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='input_image')
@@ -65,9 +66,10 @@ class M1(LoadableModel):
                              kernel_initializer =  kernel_initializer,    
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
-                             bias_regularizer   =  bias_regularizer)
+                             bias_regularizer   =  bias_regularizer,
+                             target_tensor_name = 'label')
     
-            super().__init__(name='cad', inputs=[source], outputs=[m1_model['logits']])
+            super().__init__(name=name, inputs=[source], outputs=[m1_model['logits']])
     
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
@@ -110,7 +112,7 @@ class M1(LoadableModel):
                              bias_regularizer   =  bias_regularizer,
                              target_tensor_name = 'stage_2_label')
     
-            super().__init__(name='cad', inputs=[source], outputs=[m1_stage1['logits'], m1_stage2['logits']])
+            super().__init__(name=name, inputs=[source], outputs=[m1_stage1['logits'], m1_stage2['logits']])
     
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
@@ -285,7 +287,7 @@ def m1(inputs, num_classes,
        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
        bias_regularizer   =   tf.keras.regularizers.l2(1e-4),
-       target_tensor_name =  'detection_label',
+       target_tensor_name =  'logits',
        summary            =   True):
     """
     [1] Z. Zhou et al. (2019), "UNet++: A Nested U-Net Architecture for Medical Image Segmentation", IEEE TMI.
