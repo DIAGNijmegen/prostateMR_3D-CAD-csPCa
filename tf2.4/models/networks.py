@@ -67,9 +67,9 @@ class M1(LoadableModel):
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
-                             target_tensor_name = 'label')
+                             logits_tensor_name = 'logits')
     
-            super().__init__(name=name, inputs=[source], outputs=[m1_model['logits']])
+            super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_model['y_softmax'], name='detection')])
     
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
@@ -93,7 +93,7 @@ class M1(LoadableModel):
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
-                             target_tensor_name = 'stage_1_label')
+                             logits_tensor_name = 'stage_1_logits')
 
             # Second-Stage Dual-Attention U-Net Model Definition
             m1_stage2   = m1(inputs             =  tf.keras.layers.concatenate([tf.expand_dims(
@@ -110,9 +110,15 @@ class M1(LoadableModel):
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
-                             target_tensor_name = 'stage_2_label')
-    
-            super().__init__(name=name, inputs=[source], outputs=[m1_stage1['logits'], m1_stage2['logits']])
+                             logits_tensor_name = 'stage_2_logits')
+            
+            # Pass Intermediate + Final Detection for Deep Supervision
+            if (label_encoding=='one_hot'):
+                super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_stage1['y_softmax'], name='stage_1_detection'),
+                                                                      tf.identity(m1_stage2['y_softmax'], name='stage_2_detection')])
+            elif (label_encoding=='ordinal'):
+                super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_stage1['y_sigmoid'], name='stage_1_detection'),
+                                                                      tf.identity(m1_stage2['y_sigmoid'], name='stage_2_detection')])
     
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
@@ -287,7 +293,7 @@ def m1(inputs, num_classes,
        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
        bias_regularizer   =   tf.keras.regularizers.l2(1e-4),
-       target_tensor_name =  'logits',
+       logits_tensor_name =  'logits',
        summary            =   True):
     """
     [1] Z. Zhou et al. (2019), "UNet++: A Nested U-Net Architecture for Medical Image Segmentation", IEEE TMI.
@@ -359,7 +365,7 @@ def m1(inputs, num_classes,
     uconv0      = DropoutFunc(dropout_rate/2)(uconv0)
 
     # Final Convolutional Layer [Logits] + Softmax/Argmax
-    y__         = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), name=target_tensor_name, **conv_params)(uconv0)
+    y__         = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), name=logits_tensor_name, **conv_params)(uconv0)
     y_          = tf.argmax(y__, axis=-1) \
                         if num_classes>1  \
                         else tf.cast(tf.greater_equal(y__[..., 0], 0.5), tf.int32)
