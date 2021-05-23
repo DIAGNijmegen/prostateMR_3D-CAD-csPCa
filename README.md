@@ -14,7 +14,7 @@
 **Model Setup Example in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/cnn) )*
 ```python
-# U-Net Model Definition (Hyperparameters are Data-Centric and Require Adequate Tuning for Optimal Performance)
+# U-Net Model Definition (Note: Hyperparameters are Data-Centric and Require Adequate Tuning for Optimal Performance)
 unet_model = models.networks.M1(input_spatial_dims =  (18,144,144),            
                                 input_channels     =   3,
                                 num_classes        =   2,                       
