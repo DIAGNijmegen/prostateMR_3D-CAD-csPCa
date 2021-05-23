@@ -15,10 +15,10 @@
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/cnn) )*
 ```python
 # U-Net Model Definition (Hyperparameters are Data-Centric and Require Adequate Tuning for Optimal Performance)
-unet_model = models.networks.M1(input_spatial_dims =  (18,192,192),            
+unet_model = models.networks.M1(input_spatial_dims =  (18,144,144),            
                                 input_channels     =   3,
                                 num_classes        =   2,                       
-                                filters            =  (32,64,128,256,512),   
+                                filters            =  (16,32,64,128,256),   
                                 strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
                                 kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),  
                                 dropout_rate       =   0.50,       
