@@ -322,6 +322,13 @@ def m1(inputs, num_classes,
     if   (dropout_mode=='standard'):     DropoutFunc = tf.keras.layers.Dropout
     elif (dropout_mode=='monte-carlo'):  DropoutFunc = MonteCarloDropout
 
+    assert len(filters)==5, "ERROR: Expected Tuple/Array with 5 Values (One Per Resolution)."
+    assert len(se_reduction)==5, "ERROR: Expected Tuple/Array with 5 Values (One Per Resolution)."
+    assert [len(a) for a in att_sub_samp]==[3,3,3], "ERROR: Expected 3x3 Tuple/Array (3D Sub-Sampling Factors for 3 Attention Gates)."
+    assert [len(s) for s in strides]==[3,3,3,3,3], "ERROR: Expected 5x3 Tuple/Array (3D Strides for 5 Resolutions)."
+    assert [len(k) for k in kernel_sizes]==[3,3,3,3,3], "ERROR: Expected 5x3 Tuple/Array (3D Kernels for 5 Resolutions)."
+
+
     # Preliminary Convolutional Layer
     x     = tf.keras.layers.Conv3D(filters=filters[0], kernel_size=kernel_sizes[0], strides=strides[0], **conv_params)(x)
     x     = tfa.layers.InstanceNormalization()(x)
