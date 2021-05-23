@@ -10,7 +10,6 @@
   ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
 
 <kbd>![schematic](docs/image-1.png)</kbd>
-<kbd>![schematic](docs/image-2.png)</kbd>
 
 **Model Setup Example in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/cnn) )*
