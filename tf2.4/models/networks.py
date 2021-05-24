@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 import tensorflow_addons as tfa
 from .modelio import LoadableModel, store_config_args
 
@@ -9,7 +10,7 @@ Script:         Model Definition
 Contributor:    anindox8
 Target Organ:   Prostate
 Target Classes: Benign(0), Malignant(1)
-Update:         17/05/2021
+Update:         18/05/2021
 
 '''
 
@@ -42,19 +43,19 @@ class M1(LoadableModel):
                  label_encoding     =  'one_hot',
                  cascaded           =   False,
                  anatomical_prior   =   False,
-                 name               =  'cad'):
+                 name               =  'UNET-TYPE-M1'):
 
         # Ensure Correct Dimensionality
         ndims = len(input_spatial_dims)
-        assert ndims in [1,2,3], 'Variable (ndims) should be 1,2 or 3. Found: %d.'%ndims
-    
+        assert ndims in [1,2,3], 'Variable (ndims) should be  1, 2 or 3. Found: %d.'%ndims
+        
         # Input Layer Definition
-        source = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='input_image')
-
+        image = tf.keras.Input(shape=(*input_spatial_dims, input_channels+1 if anatomical_prior else input_channels), name='image')    
+            
         # Standard Single-Stage Model
-        if not cascaded:            
+        if (cascaded==False):            
             # Dual-Attention U-Net Model Definition
-            m1_model    = m1(inputs             =  source, 
+            m1_model    = m1(inputs             =  image, 
                              num_classes        =  num_classes, 
                              dropout_mode       =  dropout_mode,
                              dropout_rate       =  dropout_rate,          
@@ -66,11 +67,13 @@ class M1(LoadableModel):
                              kernel_initializer =  kernel_initializer,    
                              bias_initializer   =  bias_initializer,     
                              kernel_regularizer =  kernel_regularizer,    
-                             bias_regularizer   =  bias_regularizer,
-                             logits_tensor_name = 'logits')
-    
-            super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_model['y_softmax'], name='detection')])
-    
+                             bias_regularizer   =  bias_regularizer)
+            
+            if (label_encoding=='one_hot'): pred = tf.keras.layers.Lambda(lambda x: x, name='detection')(m1_model['y_softmax'])
+            if (label_encoding=='ordinal'): pred = tf.keras.layers.Lambda(lambda x: x, name='detection')(m1_model['y_sigmoid'])
+
+            super().__init__(name=name, inputs=[image], outputs=[pred])
+
             # Cache Pointers to Layers/Tensors for Future Reference
             self.references           = LoadableModel.ReferenceContainer()
             self.references.m1_model  = m1_model
@@ -80,13 +83,13 @@ class M1(LoadableModel):
         # Cascaded Two-Stage Model
         else:            
             # First-Stage Dual-Attention U-Net Model Definition
-            m1_stage1   = m1(inputs             =  source, 
+            m1_stage1   = m1(inputs             =  image, 
                              num_classes        =  num_classes, 
                              dropout_mode       =  dropout_mode,
                              dropout_rate       =  dropout_rate,          
                              filters            = [x//2 for x in filters],            
-                             strides            =  strides, 
-                             kernel_sizes       =  kernel_sizes,           
+                             strides            =  strides,
+                             kernel_sizes       =  kernel_sizes,            
                              se_reduction       =  se_reduction,          
                              att_sub_samp       =  att_sub_samp,                   
                              kernel_initializer =  kernel_initializer,    
@@ -97,13 +100,13 @@ class M1(LoadableModel):
 
             # Second-Stage Dual-Attention U-Net Model Definition
             m1_stage2   = m1(inputs             =  tf.keras.layers.concatenate([tf.expand_dims(
-                                                   m1_stage1['y_softmax'][:,:,:,:,1],axis=-1), source], axis=-1), 
+                                                   m1_stage1['y_softmax'][:,:,:,:,1],axis=-1), image], axis=-1), 
                              num_classes        =  num_classes, 
                              dropout_rate       =  dropout_rate, 
                              dropout_mode       =  dropout_mode,         
-                             filters            =  filters,            
-                             strides            =  strides,
-                             kernel_sizes       =  kernel_sizes,            
+                             filters            = [x//2 for x in filters],            
+                             strides            =  strides,  
+                             kernel_sizes       =  kernel_sizes,          
                              se_reduction       =  se_reduction,          
                              att_sub_samp       =  att_sub_samp,               
                              kernel_initializer =  kernel_initializer,    
@@ -111,27 +114,38 @@ class M1(LoadableModel):
                              kernel_regularizer =  kernel_regularizer,    
                              bias_regularizer   =  bias_regularizer,
                              logits_tensor_name = 'stage_2_logits')
+
+            # Coupled Inference
+            assert (label_encoding=='one_hot'), 'Cascaded Functionality Only Available for Non-Ordinal Objectives.'
+            stage_1_pred = m1_stage1['y_softmax'][:,:,:,:,1]
+            stage_2_pred = m1_stage2['y_softmax'][:,:,:,:,1]
+
+            # Possible Aggregation Strategies
+            if (cascaded=='identity'):   joint_pred = tf.expand_dims((tf.identity(stage_2_pred)), axis=-1)
+            elif (cascaded=='noisy-or'): joint_pred = tf.expand_dims((1-((1-stage_1_pred)*(1-stage_2_pred))), axis=-1)
+            elif (cascaded=='bayes'):
+                joint_pred = tf.expand_dims((((stage_1_pred*stage_2_pred)+1e-9) \
+                                           / ((stage_1_pred*stage_2_pred)+1e-9 + ((1-stage_1_pred)*(1-stage_2_pred)))), axis=-1)
             
-            # Pass Intermediate + Final Detection for Deep Supervision
-            if (label_encoding=='one_hot'):
-                super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_stage1['y_softmax'], name='stage_1_detection'),
-                                                                      tf.identity(m1_stage2['y_softmax'], name='stage_2_detection')])
-            elif (label_encoding=='ordinal'):
-                super().__init__(name=name, inputs=[source], outputs=[tf.identity(m1_stage1['y_sigmoid'], name='stage_1_detection'),
-                                                                      tf.identity(m1_stage2['y_sigmoid'], name='stage_2_detection')])
+            # Output Prediction (+ Stage 1 Prediction for Deep Supervision)
+            stage_1_pred = tf.keras.layers.concatenate((tf.expand_dims((1-stage_1_pred), axis=-1),
+                                                      tf.expand_dims((stage_1_pred),   axis=-1)), name='stage_1_detection')
+            joint_pred   = tf.keras.layers.concatenate((1-joint_pred,joint_pred),                 name='stage_2_detection')
+    
+            super().__init__(name=name, inputs =[image], outputs=[stage_1_pred,joint_pred])
     
             # Cache Pointers to Layers/Tensors for Future Reference
-            self.references           = LoadableModel.ReferenceContainer()
-            self.references.m1_stage1 = m1_stage1
-            self.references.m1_stage2 = m1_stage2
-            self.encoding             = label_encoding
-            self.cascaded             = cascaded
+            self.references            = LoadableModel.ReferenceContainer()
+            self.references.m1_stage1  = m1_stage1
+            self.references.m1_stage2  = m1_stage2
+            self.encoding              = label_encoding
+            self.cascaded              = cascaded
 
     def get_detect_model(self):
         """
         Returns Reconfigured Model to Predict Lesion Probabilities Only.
         """
-        if self.cascaded:
+        if (self.cascaded!=False):
             if (self.encoding=='ordinal'): return tf.keras.Model(self.inputs, [self.references.m1_stage1['y_sigmoid'], self.references.m1_stage2['y_sigmoid']])
             if (self.encoding=='one_hot'): return tf.keras.Model(self.inputs, [self.references.m1_stage1['y_softmax'], self.references.m1_stage2['y_softmax']])
         else:
@@ -372,7 +386,7 @@ def m1(inputs, num_classes,
     uconv0      = DropoutFunc(dropout_rate/2)(uconv0)
 
     # Final Convolutional Layer [Logits] + Softmax/Argmax
-    y__         = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), name=logits_tensor_name, **conv_params)(uconv0)
+    y__         = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), **conv_params, name=logits_tensor_name)(uconv0)
     y_          = tf.argmax(y__, axis=-1) \
                         if num_classes>1  \
                         else tf.cast(tf.greater_equal(y__[..., 0], 0.5), tf.int32)
@@ -396,117 +410,9 @@ def m1(inputs, num_classes,
     
     outputs['pre_logits'] = uconv0
     outputs['logits']     = y__
-    outputs['y_softmax']  = tf.keras.activations.softmax(y__)    
+    outputs['y_softmax']  = tf.keras.activations.softmax(y__)     
     outputs['y_sigmoid']  = tf.keras.activations.sigmoid(y__)    
     outputs['y_']         = y_
 
     return outputs  
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
