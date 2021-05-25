@@ -20,13 +20,15 @@ class Focal:
     [1] T.Y. Lin et al. (2017), "Focal Loss for Dense Object Detection", IEEE CVPR. 
     """
     def __init__(self, alpha=0.25, gamma=2.0):
-        self.alpha         = alpha
-        self.gamma         = gamma
+        self.alpha    = alpha
+        self.gamma    = gamma
 
     def loss(self, y_true, y_pred):
-        ce                 = tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
-        weight             = tf.math.multiply(tf.cast(y_true, tf.float32),  tf.math.pow(tf.math.subtract(1.0, y_pred), self.gamma))
-        fl                 = tf.reduce_max(tf.math.multiply(self.alpha, tf.math.multiply(weight, ce)), axis=1)
+        y_pred       /= tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)                        
+        y_pred        = tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1-tf.keras.backend.epsilon()) 
+        ce            = tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
+        weight        = tf.math.multiply(tf.cast(y_true, tf.float32),  tf.math.pow(tf.math.subtract(1.0, y_pred), self.gamma))
+        fl            = tf.math.multiply(self.alpha, tf.math.multiply(weight, ce))
         return tf.reduce_mean(fl)
 
 
