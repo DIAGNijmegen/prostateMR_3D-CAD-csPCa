@@ -37,7 +37,7 @@ class Weighted_Categorical_CE:
     Weighted Adaptation of tf.keras.losses.CategoricalCrossentropy {weights: np.array([C1,C2,C3,...])}
     """
     def __init__(self, class_weights):
-        self.weights      =  class_weights
+        self.weights  =  class_weights
             
     def loss(self, y_true, y_pred):
         weights       =  tf.convert_to_tensor(self.weights, dtype=tf.float32)
