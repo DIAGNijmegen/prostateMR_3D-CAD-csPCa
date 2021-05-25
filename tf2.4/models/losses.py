@@ -43,7 +43,7 @@ class Weighted_Categorical_CE:
         weights       =  tf.convert_to_tensor(self.weights, dtype=tf.float32)
         y_pred       /=  tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)                        
         y_pred        =  tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1-tf.keras.backend.epsilon()) 
-        loss          =  tf.math.multiply(tf.cast(y_true, tf.float32), tf.math.log(y_pred))
-        weighted      =  tf.math.multiply(loss, weights)
-        loss          = -tf.keras.backend.sum(loss, -1)
+        ce            =  tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
+        wce           =  tf.math.multiply(ce, weights)
+        loss          =  tf.keras.backend.sum(loss, -1)
         return loss
