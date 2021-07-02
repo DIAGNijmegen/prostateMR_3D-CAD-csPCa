@@ -34,9 +34,8 @@ EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)},
 train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', output_types  = EXPECTED_IO_TYPE, 
                                                                                     output_shapes = EXPECTED_IO_SHAPE)     
 train_gen = train_gen.cache(filename='''ENTER_PATH_TO_CACHE_FILE''')                                                     
-train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,AUGM_PARAMS[0],AUGM_PARAMS[1],AUGM_PARAMS[2],  
-                                                                               AUGM_PARAMS[3],AUGM_PARAMS[4],AUGM_PARAMS[5],
-                                                                               False), num_parallel_calls=multiprocessing.cpu_count())
+train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,AUGM_PARAMS,False,True), 
+                                                       num_parallel_calls=multiprocessing.cpu_count())
                                                                                
 train_gen = train_gen.repeat()                                # Repeat Samples Upon Exhaustion
 train_gen = train_gen.shuffle(4*8)                            # Shuffle Samples with Buffer Size of Batch Size*8
