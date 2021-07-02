@@ -30,7 +30,15 @@ Update:         18/05/2021
 
 
 # Tensor-Based Morphological Augmentations Compatible with TensorFlow Datasets
-def augment_tensors(features, targets, prob, translate_factor=0.20, rotation_degree=20, axial_hflip=True, zoom_factor=1.25, gauss_noise_stddev=False, cascaded=False, soft_labels=True):
+def augment_tensors(features, targets, augmentation_params, cascaded=False, soft_labels=True):
+
+    # Extract Augmentation Hyperparameters
+    prob                = augmentation_params[0] 
+    translate_factor    = augmentation_params[1]
+    rotation_degree     = augmentation_params[2]
+    axial_hflip         = augmentation_params[3]
+    zoom_factor         = augmentation_params[4]
+    gauss_noise_stddev  = augmentation_params[5]
     
     # Master Probability of Augmentations
     if (np.random.uniform(low=0,high=1)>(1-prob)):     
