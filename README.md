@@ -15,6 +15,34 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 **Model Setup Example in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/cnn) )*
 ```python
+
+# Define Train-Time Augmentations Hyperparameters
+AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
+                      0.15, # ± Maximum X-Y Translation Factor
+                      7.50, # ± Maximum Rotation in Degrees
+                      True, # Enable Horizontal Flip
+                      1.15, # Maximum Zoom-In Factor
+                      1.00] # Maximum StdDev of Additive Gaussian Noise
+                      
+# Expected Input/Image and Label/Detection Data Type+Shape
+EXPECTED_IO_TYPE  = ({"image":      tf.float32}, 
+                     {"detection":  tf.float32})
+EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)}, 
+                     {"detection": (20,160,160)+(2,)})
+
+# Initialize TensorFlow Dataset, Cache Dataset on Remote Server (Optional), Map Parallelized Data Augmentation
+train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', output_types  = EXPECTED_IO_TYPE, 
+                                                                                    output_shapes = EXPECTED_IO_SHAPE)     
+train_gen = train_gen.cache(filename='''ENTER_PATH_TO_CACHE_FILE''')                                                     
+train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,AUGM_PARAMS[0],AUGM_PARAMS[1],AUGM_PARAMS[2],  
+                                                                               AUGM_PARAMS[3],AUGM_PARAMS[4],AUGM_PARAMS[5],
+                                                                               False), num_parallel_calls=multiprocessing.cpu_count())
+                                                                               
+train_gen = train_gen.repeat()                                # Repeat Samples Upon Exhaustion
+train_gen = train_gen.shuffle(4*8)                            # Shuffle Samples with Buffer Size of Batch Size*8
+train_gen = train_gen.batch(4)                                # Load Data in Batches of 4
+train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)  # Prefetch Data via CPU while GPU is Training
+
 # U-Net Model Definition (Note: Hyperparameters are Data-Centric and Require Adequate Tuning for Optimal Performance)
 unet_model = models.networks.M1(input_spatial_dims =  (20,160,160),            
                                 input_channels     =   3,
@@ -40,7 +68,7 @@ unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=1e-4, amsgrad=True),
 unet_model.summary()
 
 # Train Model
-unet_model.fit(...)
+unet_model.fit(train_gen,...)
 ```
 
 **Related Publications:**  
