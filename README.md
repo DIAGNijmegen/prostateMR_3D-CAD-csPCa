@@ -12,7 +12,7 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 
 <kbd>![schematic](docs/image-1.png)</kbd>
 
-**Model Setup Example in TensorFlow 2.4:**  
+**Minimal Example of Model Setup in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
 
