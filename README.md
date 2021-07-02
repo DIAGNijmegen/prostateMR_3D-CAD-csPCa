@@ -31,8 +31,10 @@ EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)},
                      {"detection": (20,160,160)+(2,)})
 
 # Initialize TensorFlow Dataset, Cache Dataset on Remote Server (Optional), Map Parallelized Data Augmentation
-train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', output_types  = EXPECTED_IO_TYPE, 
-                                                                                    output_shapes = EXPECTED_IO_SHAPE)     
+train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', 
+                                           output_types  = EXPECTED_IO_TYPE, 
+                                           output_shapes = EXPECTED_IO_SHAPE)
+                                           
 train_gen = train_gen.cache(filename='''ENTER_PATH_TO_CACHE_FILE''')                                                     
 train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,AUGM_PARAMS,False,True), 
                                                        num_parallel_calls=multiprocessing.cpu_count())
