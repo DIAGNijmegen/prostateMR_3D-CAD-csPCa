@@ -56,26 +56,26 @@ train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE) # CPU Prefetches Da
 
 # U-Net Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
 unet_model = models.networks.M1(\
-                          input_spatial_dims =  (20,160,160),            
-                          input_channels     =   3,
-                          num_classes        =   2,                       
-                          filters            =  (32,64,128,256,512),   
-                          strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
-                          kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),  
-                          dropout_rate       =   0.50,       
-                          dropout_mode       =  'standard',
-                          se_reduction       =  (8,8,8,8,8),
-                          att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
-                          kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1), 
-                          bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-3),
-                          kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
-                          bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
-                          cascaded           =   False)  
+                        input_spatial_dims =  (20,160,160),            
+                        input_channels     =   3,
+                        num_classes        =   2,                       
+                        filters            =  (32,64,128,256,512),   
+                        strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
+                        kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),  
+                        dropout_rate       =   0.50,       
+                        dropout_mode       =  'standard',
+                        se_reduction       =  (8,8,8,8,8),
+                        att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
+                        kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1), 
+                        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-3),
+                        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+                        bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
+                        cascaded           =   False)  
 
 # Schedule Cosine Annealing Learning Rate with Warm Restarts
 LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
-                          initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
-                          first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
+                        initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
+                        first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
 unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=LR_SCHEDULE, amsgrad=True), 
