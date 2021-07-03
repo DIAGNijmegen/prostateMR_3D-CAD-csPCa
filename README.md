@@ -67,7 +67,7 @@ unet_model = models.networks.M1(\
                           se_reduction       =  (8,8,8,8,8),
                           att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
                           kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
-                          bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=1e-3),
+                          bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-3),
                           kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                           bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
                           cascaded           =   False)  
