@@ -16,7 +16,10 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
 
-# Define Train-Time Augmentations Hyperparameters
+# Define Basic Hyperparameters
+NUM_EPOCHS        =   150
+TRAIN_SAMPLES     =   2500
+BATCH_SIZE        =   10
 AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
                       0.15, # ± Maximum X-Y Translation Factor
                       7.50, # ± Maximum Rotation in Degrees
@@ -40,7 +43,7 @@ train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,A
                                                        num_parallel_calls=multiprocessing.cpu_count())
                                                                                
 train_gen = train_gen.repeat()                                # Repeat Samples Upon Exhaustion
-train_gen = train_gen.shuffle(4*8)                            # Shuffle Samples with Buffer Size of Batch Size*8
+train_gen = train_gen.shuffle(4*BATCH_SIZE)                   # Shuffle Samples with Buffer Size of Batch Size
 train_gen = train_gen.batch(4)                                # Load Data in Batches of 4
 train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)  # Prefetch Data via CPU while GPU is Training
 
@@ -61,15 +64,20 @@ unet_model = models.networks.M1(input_spatial_dims =  (20,160,160),
                                 bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
                                 cascaded           =   False)  
 
+# Cosine Annealing Learning Rate with Warm Restarts
+LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
+                           initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
+                           first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
+                                                  
 # Compile Model w/ Optimizer and Loss Function(s)
-unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=1e-4, amsgrad=True), 
+unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=LR_SCHEDULE, amsgrad=True), 
                    loss      = models.losses.Focal(alpha=0.75, gamma=2.00).loss)
 
 # Display Model Summary
 unet_model.summary()
 
 # Train Model
-unet_model.fit(train_gen,...)
+unet_model.fit(x=train_gen, epochs=NUM_EPOCHS, steps_per_epoch=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE))))
 ```
 
 **Related Publications:**  
