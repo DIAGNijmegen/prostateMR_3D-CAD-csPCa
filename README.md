@@ -45,14 +45,14 @@ train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR'
                                            output_types  = EXPECTED_IO_TYPE, 
                                            output_shapes = EXPECTED_IO_SHAPE)
                                            
-train_gen = train_gen.cache(filename='''ENTER_PATH_TO_CACHE_FILE''')                                                     
+train_gen = train_gen.cache(filename='''ENTER_PATH_TO_CACHE_FILE''')     
 train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,AUGM_PARAMS,False,True), 
                                                        num_parallel_calls=multiprocessing.cpu_count())
                                                                                
-train_gen = train_gen.repeat()                                # Repeat Samples Upon Exhaustion
-train_gen = train_gen.shuffle(4*BATCH_SIZE)                   # Shuffle Samples with Buffer Size of Batch Size
-train_gen = train_gen.batch(4)                                # Load Data in Batches of 4
-train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)  # Prefetch Data via CPU while GPU is Training
+train_gen = train_gen.repeat()                               # Repeat Samples Upon Exhaustion
+train_gen = train_gen.shuffle(4*BATCH_SIZE)                  # Shuffle Samples with Buffer Size of Batch Size
+train_gen = train_gen.batch(BATCH_SIZE)                      # Load Data in Batches
+train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE) # Prefetch Data via CPU while GPU is Training
 
 # U-Net Model Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
 unet_model = models.networks.M1(\
