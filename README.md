@@ -64,7 +64,7 @@ unet_model = models.networks.M1(input_spatial_dims =  (20,160,160),
                                 bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
                                 cascaded           =   False)  
 
-# Cosine Annealing Learning Rate with Warm Restarts
+# Schedule Cosine Annealing Learning Rate with Warm Restarts
 LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
                            initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
                            first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
