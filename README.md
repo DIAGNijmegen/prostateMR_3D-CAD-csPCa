@@ -40,7 +40,7 @@ EXPECTED_IO_TYPE  = ({"image":      tf.float32},
 EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)}, 
                      {"detection": (20,160,160)+(2,)})
 
-# Initialize TensorFlow Dataset, Cache Dataset on Remote Server (Optional), Map Parallelized Data Augmentation
+# Initialize TensorFlow Dataset, Cache on Remote Server (Optional), Map Parallelized Data Augmentation
 train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', 
                                            output_types  = EXPECTED_IO_TYPE, 
                                            output_shapes = EXPECTED_IO_SHAPE)
@@ -54,27 +54,28 @@ train_gen = train_gen.shuffle(4*BATCH_SIZE)                   # Shuffle Samples 
 train_gen = train_gen.batch(4)                                # Load Data in Batches of 4
 train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)  # Prefetch Data via CPU while GPU is Training
 
-# U-Net Model Definition (Note: Hyperparameters are Data-Centric and Require Adequate Tuning for Optimal Performance)
-unet_model = models.networks.M1(input_spatial_dims =  (20,160,160),            
-                                input_channels     =   3,
-                                num_classes        =   2,                       
-                                filters            =  (32,64,128,256,512),   
-                                strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
-                                kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),  
-                                dropout_rate       =   0.50,       
-                                dropout_mode       =  'standard',
-                                se_reduction       =  (8,8,8,8,8),
-                                att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
-                                kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
-                                bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),
-                                kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
-                                bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
-                                cascaded           =   False)  
+# U-Net Model Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
+unet_model = models.networks.M1(\
+                          input_spatial_dims =  (20,160,160),            
+                          input_channels     =   3,
+                          num_classes        =   2,                       
+                          filters            =  (32,64,128,256,512),   
+                          strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
+                          kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),  
+                          dropout_rate       =   0.50,       
+                          dropout_mode       =  'standard',
+                          se_reduction       =  (8,8,8,8,8),
+                          att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
+                          kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
+                          bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=1e-3),
+                          kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+                          bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
+                          cascaded           =   False)  
 
 # Schedule Cosine Annealing Learning Rate with Warm Restarts
 LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
-                           initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
-                           first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
+                          initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
+                          first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
 unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=LR_SCHEDULE, amsgrad=True), 
