@@ -12,6 +12,13 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 
 <kbd>![schematic](docs/image-1.png)</kbd>
 
+**Related Publications:**  
+● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
+  Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155)
+
+● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
+  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263)
+
 **Minimal Example of Model Setup in TensorFlow 2.4:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
@@ -79,13 +86,6 @@ unet_model.summary()
 # Train Model
 unet_model.fit(x=train_gen, epochs=NUM_EPOCHS, steps_per_epoch=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE))))
 ```
-
-**Related Publications:**  
-● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
-  Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155)
-
-● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
-  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263)
   
 **Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
 
