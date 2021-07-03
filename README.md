@@ -50,11 +50,11 @@ train_gen = train_gen.map(lambda x,y: models.augmentations.augment_tensors(x,y,A
                                                        num_parallel_calls=multiprocessing.cpu_count())
                                                                                
 train_gen = train_gen.repeat()                               # Repeat Samples Upon Exhaustion
-train_gen = train_gen.shuffle(4*BATCH_SIZE)                  # Shuffle Samples with Buffer Size of Batch Size
+train_gen = train_gen.shuffle(4*BATCH_SIZE)                  # Shuffle Samples with 4*Batch Size Buffer
 train_gen = train_gen.batch(BATCH_SIZE)                      # Load Data in Batches
-train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE) # Prefetch Data via CPU while GPU is Training
+train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE) # CPU Prefetches Data while GPU Trains
 
-# U-Net Model Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
+# U-Net Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
 unet_model = models.networks.M1(\
                           input_spatial_dims =  (20,160,160),            
                           input_channels     =   3,
@@ -66,7 +66,7 @@ unet_model = models.networks.M1(\
                           dropout_mode       =  'standard',
                           se_reduction       =  (8,8,8,8,8),
                           att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
-                          kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0), 
+                          kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1), 
                           bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-3),
                           kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                           bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
