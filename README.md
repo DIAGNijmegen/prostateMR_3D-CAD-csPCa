@@ -35,7 +35,7 @@ AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
                       1.15, # Maximum Zoom-In Factor
                       1.00] # Maximum StdDev of Additive Gaussian Noise
                       
-# Expected Data Type+Shape for Input Image and Target Label 
+# Expected Data Type+Shape for Input Image and One-Hot Encoded Target Label 
 EXPECTED_IO_TYPE  = ({"image":      tf.float32}, 
                      {"detection":  tf.float32})
 EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)}, 
