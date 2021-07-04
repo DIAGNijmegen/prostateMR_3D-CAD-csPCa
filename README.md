@@ -26,6 +26,7 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 # Define Basic Hyperparameters
 NUM_EPOCHS        =   150
 TRAIN_SAMPLES     =   2500
+BASE_LR           =   1e-3
 BATCH_SIZE        =   10
 AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
                       0.15, # ± Maximum X-Y Translation Factor
@@ -74,7 +75,7 @@ unet_model = models.networks.M1(\
 
 # Schedule Cosine Annealing Learning Rate with Warm Restarts
 LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
-                        initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
+                        initial_learning_rate=BASE_LR, t_mul=2.00, m_mul=1.00, alpha=1e-3,
                         first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
