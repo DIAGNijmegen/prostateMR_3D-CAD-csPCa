@@ -55,7 +55,7 @@ train_gen = train_gen.shuffle(4*BATCH_SIZE)                  # Shuffle Samples w
 train_gen = train_gen.batch(BATCH_SIZE)                      # Load Data in Batches
 train_gen = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE) # CPU Prefetches Data while GPU Trains
 
-# U-Net Definition (Note: Hyperparameters are Data-Centric -> Adequate Tuning for Optimal Performance)
+# U-Net Definition (Note: Hyperparameters are Data-Centric -> Requires Tuning for Optimal Performance)
 unet_model = models.networks.M1(\
                         input_spatial_dims =  (20,160,160),            
                         input_channels     =   3,
