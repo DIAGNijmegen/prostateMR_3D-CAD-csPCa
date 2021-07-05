@@ -1,6 +1,6 @@
 # Clinically Significant Prostate Cancer Detection in bpMRI
 
-**Note**: This repo will be continually updated upon future advancements and we welcome open-source contributions! Currently, it shares the open-source TensorFlow 2.4 version of the deep attention-driven 3D U-Net (Type: *M1*), as introduced in the publication(s) listed below. Source code (and the anatomical prior) used for training this model, as per our original setup, carry a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. We encourage users to test out *M1*, identify potential areas for significant improvement and propose PRs for inclusion to this repo.
+**Note**: This repo will be continually updated upon future advancements and we welcome open-source contributions! Currently, it shares the open-source TensorFlow 2.5 version of the deep attention-driven 3D U-Net (Type: *M1*), as introduced in the publication(s) listed below. Source code (and the anatomical prior) used for training this model, as per our original setup, carry a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. We encourage users to test out *M1*, identify potential areas for significant improvement and propose PRs for inclusion to this repo.
 
 **Pre-Trained Model using 1950 bpMRI with [PI-RADS v2](https://www.sciencedirect.com/science/article/pii/S0302283815008489?via%3Dihub) Annotations [Training:Validation Ratio - 80:20]:**  
 To infer lesion predictions on testing samples using the pre-trained variant of this algorithm, please visit https://grand-challenge.org/algorithms/prostate-mri-cad-cspca/
@@ -19,7 +19,7 @@ To infer lesion predictions on testing samples using the pre-trained variant of 
 ● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
   NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263)
 
-**Minimal Example of Model Setup in TensorFlow 2.4:**  
+**Minimal Example of Model Setup in TensorFlow 2.5:**  
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
 
@@ -74,12 +74,12 @@ unet_model = models.networks.M1(\
                         cascaded           =   False)  
 
 # Schedule Cosine Annealing Learning Rate with Warm Restarts
-LR_SCHEDULE = tf.keras.optimizers.schedules.CosineDecayRestarts(\
+LR_SCHEDULE = (tf.keras.optimizers.schedules.CosineDecayRestarts(\
                         initial_learning_rate=BASE_LR, t_mul=2.00, m_mul=1.00, alpha=1e-3,
-                        first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10)
+                        first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10))
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
-unet_model.compile(optimizer = tf.keras.optimizers.Adam(lr=LR_SCHEDULE, amsgrad=True), 
+unet_model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=LR_SCHEDULE, amsgrad=True), 
                    loss      = models.losses.Focal(alpha=0.75, gamma=2.00).loss)
 
 # Display Model Summary
