@@ -29,8 +29,8 @@ TRAIN_SAMPLES     =   2500
 BASE_LR           =   1e-3
 BATCH_SIZE        =   10
 AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
-                      0.15, # ± Maximum X-Y Translation Factor
-                      7.50, # ± Maximum Rotation in Degrees
+                      0.15, # Maximum ± X-Y Translation Factor
+                      7.50, # Maximum ± Rotation in Degrees
                       True, # Enable Horizontal Flip
                       1.15, # Maximum Zoom-In Factor
                       0.50] # Maximum StdDev of Additive Gaussian Noise
