@@ -33,7 +33,7 @@ AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
                       7.50, # ± Maximum Rotation in Degrees
                       True, # Enable Horizontal Flip
                       1.15, # Maximum Zoom-In Factor
-                      1.00] # Maximum StdDev of Additive Gaussian Noise
+                      0.50] # Maximum StdDev of Additive Gaussian Noise
                       
 # Expected Data Type+Shape for Input Image and One-Hot Encoded Target Label 
 EXPECTED_IO_TYPE  = ({"image":      tf.float32}, 
