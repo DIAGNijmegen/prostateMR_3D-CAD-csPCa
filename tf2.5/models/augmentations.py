@@ -24,7 +24,7 @@ Script:         Model Definition
 Contributor:    anindox8
 Target Organ:   Prostate
 Target Classes: Benign(0), Malignant(1)
-Update:         18/05/2021
+Update:         18/07/2021
 
 '''
 
@@ -54,7 +54,7 @@ def augment_tensors(features, targets, augmentation_params, cascaded=False, soft
     
         # Translation Probability, Offset Values and Augmentation    
         if (translate_factor!=0.00): 
-            trans_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                     # Translation Probability
+            trans_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Translation Probability
             pad_top        = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
             pad_bottom     = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
             pad_right      = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[2]*translate_factor), dtype=tf.int32)  # Translation Offset
@@ -64,25 +64,25 @@ def augment_tensors(features, targets, augmentation_params, cascaded=False, soft
 
         # Horizontal Flipping Along Axial Plane Probability and Augmentation
         if (axial_hflip==True):
-            flip_prob      = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Horizontal Flipping Probability
+            flip_prob      = tf.constant(np.random.uniform(low=0, high=1))>(0.50)                                                     # Horizontal Flipping Probability
             input_image    = tf.cond(flip_prob, lambda: axial_4D_hflip(input_image), lambda: input_image)                           
         
         # Rotation Probability, Offset Value and Augmentation
         if (rotation_degree!=0):
-            rot_prob       = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Rotation Probability
-            angle          = tf.constant(np.random.uniform(low=-rotation_degree, high=rotation_degree))                              # Rotation Angle
+            rot_prob       = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Rotation Probability
+            angle          = tf.constant(np.random.uniform(low=-rotation_degree, high=rotation_degree))                               # Rotation Angle
             input_image    = tf.cond(rot_prob, lambda: rotate_4D_tensor(input_image,  angle=angle), lambda: input_image)                
                
         # Scaling Probability and Augmentation
         if (zoom_factor!=0.00):
-            zoom_prob      = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Scaling Probability
-            scale          = np.random.randint(low=input_image.get_shape()[1], high=input_image.get_shape()[1]*zoom_factor)      # Scaling Factor
+            zoom_prob      = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Scaling Probability
+            scale          = np.random.randint(low=input_image.get_shape()[1], high=input_image.get_shape()[1]*zoom_factor)           # Scaling Factor
             input_image    = tf.cond(zoom_prob, lambda: zoom_4D_tensor(input_image, scale=scale), lambda: input_image)                    
   
         # Additive Gaussian Noise Probability and Augmentation
         if (gauss_noise_stddev!=False):
-            gauss_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Gaussian Noise Probability
-            stddev         = tf.constant(np.random.uniform(low=0, high=gauss_noise_stddev))                                          # Standard Deviation of Noise
+            gauss_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Gaussian Noise Probability
+            stddev         = tf.constant(np.random.uniform(low=0, high=gauss_noise_stddev))                                           # Standard Deviation of Noise
             input_image    = tf.cond(gauss_prob, lambda: gaussian_noise(input_image, stddev=stddev), lambda: input_image)                    
 
         # Label Augmentations
