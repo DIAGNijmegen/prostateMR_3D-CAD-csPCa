@@ -38,8 +38,8 @@ AUGM_PARAMS       =  [1.00, # Probability of Undergoing Augmentation
 # Expected Data Type+Shape for Input Image and One-Hot Encoded Target Label 
 EXPECTED_IO_TYPE  = ({"image":      tf.float32}, 
                      {"detection":  tf.float32})
-EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)},   # [DEPTH, HEIGHT, WIDTH, NUM_CHANNELS]
-                     {"detection": (20,160,160)+(2,)})   # [DEPTH, HEIGHT, WIDTH, NUM_CLASSES]
+EXPECTED_IO_SHAPE = ({"image":     (20,160,160)+(3,)}, # [DEPTH, HEIGHT, WIDTH, NUM_CHANNELS]
+                     {"detection": (20,160,160)+(2,)}) # [DEPTH, HEIGHT, WIDTH, NUM_CLASSES]
 
 # Initialize TensorFlow Dataset, Cache on Remote Server (Optional), Map Parallelized Data Augmentation
 train_gen = tf.data.Dataset.from_generator(lambda:'''PLACE_NUMPY_DATA_GENERATOR''', 
