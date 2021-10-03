@@ -6,16 +6,13 @@ import functools
 
 '''
 Prostate Cancer Detection in bpMRI
-Script:         Model I/O Utils
+Script:         Train Model
 Contributor:    anindox8
 Target Organ:   Prostate
 Target Classes: Benign(0), Malignant(1)
-Update:         08/04/2021
-Reference:      https://github.com/voxelmorph/voxelmorph/
-                blob/master/voxelmorph/tf/modelio.py
+Update:         27/06/2021
 
 '''
-
 
 
 def store_config_args(func):
