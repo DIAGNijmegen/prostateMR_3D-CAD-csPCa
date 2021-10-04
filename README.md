@@ -24,6 +24,42 @@ Architecture schematic of the deep attention-driven `3D U-Net (Type:M1)`.
 ● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
   NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263) [(commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/tree/58b784ffbd2e8c89139c6773cb9490b2fd53d814)
 
+**Minimal Example of Model Setup in TensorFlow 2.5:**  
+*(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
+```python
+# U-Net Definition (Note: Hyperparameters are Data-Centric -> Require Adequate Tuning for Optimal Performance)
+unet_model = models.networks.M1(\
+                        input_spatial_dims =  (20,160,160),            
+                        input_channels     =   3,
+                        num_classes        =   2,                       
+                        filters            =  (32,64,128,256,512),   
+                        strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),  
+                        kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),
+                        proba_event_shape  =   512
+                        dropout_rate       =   0.50,       
+                        dropout_mode       =  'monte-carlo',
+                        se_reduction       =  (8,8,8,8,8),
+                        att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1),(1,1,1)),
+                        kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1), 
+                        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0, stddev=1e-3),
+                        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
+                        bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
+                        cascaded           =   False,
+                        probabilistic      =   True,
+                        deep_supervision   =   True)  
+                                       
+# Schedule Cosine Annealing Learning Rate with Warm Restarts
+LR_SCHEDULE = (tf.keras.optimizers.schedules.CosineDecayRestarts(\
+                        initial_learning_rate=1e-3, t_mul=2.00, m_mul=1.00, alpha=1e-3,
+                        first_decay_steps=int(np.ceil(((TRAIN_SAMPLES)/BATCH_SIZE)))*10))
+                                                  
+# Compile Model w/ Optimizer and Loss Function(s)
+unet_model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=LR_SCHEDULE, amsgrad=True), 
+                   loss      = models.losses.Focal(alpha=0.75, gamma=2.00).loss)
+
+# Train Model
+unet_model.fit(...)
+```
 **Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
 
 
