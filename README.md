@@ -28,7 +28,7 @@ Architecture schematic of the deep attention-driven `3D U-Net (Type:M1)`.
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
 # U-Net Definition (Note: Hyperparameters are Data-Centric -> Require Adequate Tuning for Optimal Performance)
-unet_model = models.networks.M1(\
+unet_model = model.networks.M1(\
                         input_spatial_dims =  (20,160,160),            
                         input_channels     =   3,
                         num_classes        =   2,                       
@@ -55,7 +55,7 @@ LR_SCHEDULE = (tf.keras.optimizers.schedules.CosineDecayRestarts(\
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
 unet_model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=LR_SCHEDULE, amsgrad=True), 
-                   loss      = models.losses.Focal(alpha=0.75, gamma=2.00).loss)
+                   loss      = model.losses.Focal(alpha=0.75, gamma=2.00).loss)
 
 # Train Model
 unet_model.fit(...)
