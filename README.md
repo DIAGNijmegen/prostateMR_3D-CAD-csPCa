@@ -19,7 +19,7 @@ To infer lesion predictions on testing samples using the pre-trained variant [(c
   ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
 
 <kbd>![schematic](docs/image-1.png)</kbd>
-Train-time schematic for the Bayesian/probabilistic adaptation of `3D U-Net (Type:M1)`. `L_KL` denotes the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
+Train-time schematic for the Bayesian/probabilistic configuration of `3D U-Net (Type:M1)`. `L_KL` denotes the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
 
 <kbd>![schematic](docs/image-2.png)</kbd>
 Architecture schematic of the deep attention-driven `3D U-Net (Type:M1)`.
