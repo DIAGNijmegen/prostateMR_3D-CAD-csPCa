@@ -17,20 +17,21 @@ import tensorflow as tf
 from tensorflow.python.ops import variables
 import tensorflow_addons as tfa
 
-
 '''
-Prostate Cancer Detection in bpMRI
-Script:         Model Definition
+Prostate Cancer Detection or Zonal Segmentation in MRI
+Script:         Train-Time Augmentations
 Contributor:    anindox8
 Target Organ:   Prostate
-Target Classes: Benign(0), Malignant(1)
-Update:         18/07/2021
+Target Classes: Task 1: Benign(0), Malignant(1)
+                Task 2: Whole-Gland(0), Transitional Zone(1),
+                        Peripheral Zone (2)
+Update:         03/10/2021
 
 '''
 
 
-# Tensor-Based Morphological Augmentations Compatible with TensorFlow Datasets
-def augment_tensors(features, targets, augmentation_params, cascaded=False, soft_labels=True):
+# Tensor-Based Morphological Augmentations
+def augment_tensors(features, targets, augmentation_params, soft_labels=True):
 
     # Extract Augmentation Hyperparameters
     prob                = augmentation_params[0] 
@@ -41,74 +42,63 @@ def augment_tensors(features, targets, augmentation_params, cascaded=False, soft
     gauss_noise_stddev  = augmentation_params[5]
     
     # Master Probability of Augmentations
-    if (np.random.uniform(low=0,high=1)>(1-prob)):     
-        
-        # Extract Original Images/Labels
-        if (cascaded!=False):
-            input_image    = tf.identity(features["image"])
-            target_label_1 = tf.identity(targets["stage_1_detection"])
-            target_label_2 = tf.identity(targets["stage_2_detection"])
-        else:  
-            input_image    = tf.identity(features["image"])
+    if (np.random.uniform(low=0,high=1)>(1-prob)):    
+
+        try: 
+            # Extract Original Images/Labels
+            input_image_1  = tf.identity(features["image"])
             target_label_1 = tf.identity(targets["detection"])
-    
-        # Translation Probability, Offset Values and Augmentation    
-        if (translate_factor!=0.00): 
-            trans_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Translation Probability
-            pad_top        = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
-            pad_bottom     = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
-            pad_right      = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[2]*translate_factor), dtype=tf.int32)  # Translation Offset
-            pad_left       = tf.constant(np.random.randint(low=0, high=input_image.get_shape()[2]*translate_factor), dtype=tf.int32)  # Translation Offset
-            input_image    = tf.cond(trans_prob, lambda: translate_4D_tensor(input_image, pad_top=pad_top,     pad_bottom=pad_bottom,                    
-                                                                       pad_right=pad_right, pad_left=pad_left), lambda: input_image)  
-
-        # Horizontal Flipping Along Axial Plane Probability and Augmentation
-        if (axial_hflip==True):
-            flip_prob      = tf.constant(np.random.uniform(low=0, high=1))>(0.50)                                                     # Horizontal Flipping Probability
-            input_image    = tf.cond(flip_prob, lambda: axial_4D_hflip(input_image), lambda: input_image)                           
         
-        # Rotation Probability, Offset Value and Augmentation
-        if (rotation_degree!=0):
-            rot_prob       = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Rotation Probability
-            angle          = tf.constant(np.random.uniform(low=-rotation_degree, high=rotation_degree))                               # Rotation Angle
-            input_image    = tf.cond(rot_prob, lambda: rotate_4D_tensor(input_image,  angle=angle), lambda: input_image)                
-               
-        # Scaling Probability and Augmentation
-        if (zoom_factor!=0.00):
-            zoom_prob      = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Scaling Probability
-            scale          = np.random.randint(low=input_image.get_shape()[1], high=input_image.get_shape()[1]*zoom_factor)           # Scaling Factor
-            input_image    = tf.cond(zoom_prob, lambda: zoom_4D_tensor(input_image, scale=scale), lambda: input_image)                    
-  
-        # Additive Gaussian Noise Probability and Augmentation
-        if (gauss_noise_stddev!=False):
-            gauss_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                   # Gaussian Noise Probability
-            stddev         = tf.constant(np.random.uniform(low=0, high=gauss_noise_stddev))                                           # Standard Deviation of Noise
-            input_image    = tf.cond(gauss_prob, lambda: gaussian_noise(input_image, stddev=stddev), lambda: input_image)                    
+            # Translation Probability, Offset Values and Augmentation    
+            if (translate_factor!=0.00): 
+                trans_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                     # Translation Probability
+                pad_top        = tf.constant(np.random.randint(low=0, high=input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
+                pad_bottom     = tf.constant(np.random.randint(low=0, high=input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32)  # Translation Offset
+                pad_right      = tf.constant(np.random.randint(low=0, high=input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32)  # Translation Offset
+                pad_left       = tf.constant(np.random.randint(low=0, high=input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32)  # Translation Offset
+                input_image_1  = tf.cond(trans_prob, lambda: translate_4D_tensor(input_image_1, pad_top=pad_top,     pad_bottom=pad_bottom,                    
+                                                                           pad_right=pad_right, pad_left=pad_left), lambda: input_image_1)  
+    
+            # Horizontal Flipping Along Axial Plane Probability and Augmentation
+            if (axial_hflip==True):
+                flip_prob      = tf.constant(np.random.uniform(low=0, high=1))>(0.50)                                                  # Horizontal Flipping Probability
+                input_image_1  = tf.cond(flip_prob, lambda: axial_4D_hflip(input_image_1), lambda: input_image_1)                           
+            
+            # Rotation Probability, Offset Value and Augmentation
+            if (rotation_degree!=0):
+                rot_prob       = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Rotation Probability
+                angle          = tf.constant(np.random.uniform(low=-rotation_degree, high=rotation_degree))                              # Rotation Angle
+                input_image_1  = tf.cond(rot_prob, lambda: rotate_4D_tensor(input_image_1,  angle=angle), lambda: input_image_1)                
+                   
+            # Scaling Probability and Augmentation
+            if (zoom_factor!=0.00):
+                zoom_prob      = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Scaling Probability
+                scale          = np.random.randint(low=input_image_1.get_shape()[1], high=input_image_1.get_shape()[1]*zoom_factor)      # Scaling Factor
+                input_image_1  = tf.cond(zoom_prob, lambda: zoom_4D_tensor(input_image_1, scale=scale), lambda: input_image_1)                    
+      
+            # Additive Gaussian Noise Probability and Augmentation
+            if (gauss_noise_stddev!=False):
+                gauss_prob     = tf.constant(np.random.uniform(low=0, high=1))>(1-prob)                                                  # Gaussian Noise Probability
+                stddev         = tf.constant(np.random.uniform(low=0, high=gauss_noise_stddev))                                          # Standard Deviation of Noise
+                input_image_1  = tf.cond(gauss_prob, lambda: gaussian_noise(input_image_1, stddev=stddev), lambda: input_image_1)                    
+    
+    
+            # Label Augmentations
+            if (translate_factor!=0.00):
+                target_label_1   = tf.cond(trans_prob, lambda: translate_4D_tensor(target_label_1, binary=(not soft_labels), 
+                   pad_top=pad_top, pad_bottom=pad_bottom, pad_right=pad_right, pad_left=pad_left), lambda: target_label_1)
+    
+            if (axial_hflip==True):  target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1,   binary=(not soft_labels)),               lambda: target_label_1)                
+            if (rotation_degree!=0): target_label_1 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_1, binary=(not soft_labels),  angle=angle), lambda: target_label_1)        
+            if (zoom_factor!=0.00):  target_label_1 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_1,   binary=(not soft_labels),  scale=scale), lambda: target_label_1)
+    
+            # Sanity-Check (Label Swaps From Augmentation) -> Export Augmentated Images/Labels 
+            assert tf.math.reduce_max(tf.math.ceil(targets["detection"]))==tf.math.reduce_max(tf.math.ceil(target_label_1))
 
-        # Label Augmentations
-        if (translate_factor!=0.00):
-            target_label_1   = tf.cond(trans_prob, lambda: translate_4D_tensor(target_label_1, binary=(not soft_labels), 
-               pad_top=pad_top, pad_bottom=pad_bottom, pad_right=pad_right, pad_left=pad_left), lambda: target_label_1)
-            if (cascaded!=False):
-                target_label_2   = tf.cond(trans_prob, lambda: translate_4D_tensor(target_label_2, binary=(not soft_labels), 
-                   pad_top=pad_top, pad_bottom=pad_bottom, pad_right=pad_right, pad_left=pad_left), lambda: target_label_2)
-
-        if (axial_hflip==True):      target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1,   binary=(not soft_labels)),               lambda: target_label_1)                
-        if (rotation_degree!=0):     target_label_1 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_1, binary=(not soft_labels),  angle=angle), lambda: target_label_1)        
-        if (zoom_factor!=0.00):      target_label_1 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_1,   binary=(not soft_labels),  scale=scale), lambda: target_label_1)
-        if (cascaded!=False):         
-            if (axial_hflip==True):  target_label_2 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_2,   binary=(not soft_labels)),               lambda: target_label_2)                
-            if (rotation_degree!=0): target_label_2 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_2, binary=(not soft_labels),  angle=angle), lambda: target_label_2)        
-            if (zoom_factor!=0.00):  target_label_2 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_2,   binary=(not soft_labels),  scale=scale), lambda: target_label_2)          
-
-        # Export Augmentated Images/Labels
-        if (cascaded!=False):
-            features["image"]            = tf.identity(input_image)  
-            targets["stage_1_detection"] = tf.identity(target_label_1)  
-            targets["stage_2_detection"] = tf.identity(target_label_2)  
-        else:
-            features["image"]            = tf.identity(input_image)  
-            targets["detection"]         = tf.identity(target_label_1)  
+            features["image"]    = tf.identity(input_image_1)  
+            targets["detection"] = tf.identity(target_label_1)  
+        except:
+            pass
 
     return features, targets
 

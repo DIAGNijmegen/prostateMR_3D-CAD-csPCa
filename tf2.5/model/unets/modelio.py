@@ -5,12 +5,14 @@ import inspect
 import functools
 
 '''
-Prostate Cancer Detection in bpMRI
-Script:         Train Model
+Prostate Cancer Detection or Zonal Segmentation in MRI
+Script:         Model I/O Helpers
 Contributor:    anindox8
 Target Organ:   Prostate
-Target Classes: Benign(0), Malignant(1)
-Update:         27/06/2021
+Target Classes: Task 1: Benign(0), Malignant(1)
+                Task 2: Whole-Gland(0), Transitional Zone(1),
+                        Peripheral Zone (2)
+Update:         03/10/2021
 
 '''
 
