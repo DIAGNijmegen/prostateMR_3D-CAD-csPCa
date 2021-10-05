@@ -28,7 +28,7 @@ Architecture schematic of the deep attention-driven `3D U-Net (Type:M1)`.
 *(Reference: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance))*
 ```python
 # U-Net Definition (Note: Hyperparameters are Data-Centric -> Require Adequate Tuning for Optimal Performance)
-unet_model = model.networks.M1(\
+unet_model = unets.networks.M1(\
                         input_spatial_dims =  (20,160,160),            
                         input_channels     =   3,
                         num_classes        =   2,                       
