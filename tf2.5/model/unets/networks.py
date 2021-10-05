@@ -38,7 +38,7 @@ class M1(LoadableModel):
                  strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),           
                  kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),
                  se_reduction       =  (8,8,8,8,8),         
-                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),      
+                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1),(1,1,1)),      
                  kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0, seed=8),
                  bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
                  kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
@@ -450,7 +450,7 @@ def m1(inputs, num_classes,
        strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),           
        kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),
        se_reduction       =  (8,8,8,8,8),
-       att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),
+       att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1),(1,1,1)),
        kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0, seed=8),
        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
@@ -489,7 +489,7 @@ def m1(inputs, num_classes,
 
     assert len(filters)==5, "ERROR: Expected Tuple/Array with 5 Values (One Per Resolution)."
     assert len(se_reduction)==5, "ERROR: Expected Tuple/Array with 5 Values (One Per Resolution)."
-    assert [len(a) for a in att_sub_samp]==[3,3,3], "ERROR: Expected 3x3 Tuple/Array (3D Sub-Sampling Factors for 3 Attention Gates)."
+    assert [len(a) for a in att_sub_samp]==[3,3,3,3], "ERROR: Expected 4x3 Tuple/Array (3D Sub-Sampling Factors for 4 Attention Gates)."
     assert [len(s) for s in strides]==[3,3,3,3,3], "ERROR: Expected 5x3 Tuple/Array (3D Strides for 5 Resolutions)."
     assert [len(k) for k in kernel_sizes]==[3,3,3,3,3], "ERROR: Expected 5x3 Tuple/Array (3D Kernels for 5 Resolutions)."
 
@@ -511,9 +511,9 @@ def m1(inputs, num_classes,
 
     # Grid-Based Attention Gating
     att_conv0,att_0 = GridAttentionBlock3D(conv_tensor=x,     gating_tensor=convm, inter_channels=filters[0], sub_samp=att_sub_samp[0], conv_params=conv_params)
-    att_conv1,att_1 = GridAttentionBlock3D(conv_tensor=conv1, gating_tensor=convm, inter_channels=filters[1], sub_samp=att_sub_samp[0], conv_params=conv_params)
-    att_conv2,att_2 = GridAttentionBlock3D(conv_tensor=conv2, gating_tensor=convm, inter_channels=filters[2], sub_samp=att_sub_samp[1], conv_params=conv_params)
-    att_conv3,att_3 = GridAttentionBlock3D(conv_tensor=conv3, gating_tensor=convm, inter_channels=filters[3], sub_samp=att_sub_samp[2], conv_params=conv_params)
+    att_conv1,att_1 = GridAttentionBlock3D(conv_tensor=conv1, gating_tensor=convm, inter_channels=filters[1], sub_samp=att_sub_samp[1], conv_params=conv_params)
+    att_conv2,att_2 = GridAttentionBlock3D(conv_tensor=conv2, gating_tensor=convm, inter_channels=filters[2], sub_samp=att_sub_samp[2], conv_params=conv_params)
+    att_conv3,att_3 = GridAttentionBlock3D(conv_tensor=conv3, gating_tensor=convm, inter_channels=filters[3], sub_samp=att_sub_samp[3], conv_params=conv_params)
 
     # Decoder: Nested U-Net - Stage 3
     deconv3     = tf.keras.layers.Conv3DTranspose(filters=filters[3], kernel_size=kernel_sizes[4], strides=strides[4], padding="same")(convm)
