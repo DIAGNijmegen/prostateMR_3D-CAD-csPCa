@@ -19,8 +19,7 @@ import tensorflow as tf
 import model.losses as losses
 from model.augmentations import augment_tensors
 import model.unets as unets
-from callbacks import WeightsSaver, PCaDetectionValidation, AnatomySegmentationValidation,\
-                      ResumeTraining
+from callbacks import WeightsSaver, ResumeTraining
 from data_generators import custom_data_generator
 from misc import setup_device, print_overview
 import warnings
