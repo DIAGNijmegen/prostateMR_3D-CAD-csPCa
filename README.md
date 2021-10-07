@@ -7,17 +7,24 @@
 ● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
   NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263) [(commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/tree/58b784ffbd2e8c89139c6773cb9490b2fd53d814)
 
-**Note**: This repo will be continually updated upon future advancements and we welcome open-source contributions! Currently, it shares the open-source TensorFlow 2.5 version of the deep attention-driven `3D U-Net (Type:M1)`, as introduced in the publication(s) listed above. Source code used for training this model, as per our original setup, carry a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. We encourage users to test out `M1`, identify potential areas for significant improvement and propose PRs for inclusion to this repo.
-
-**Pre-Trained Model using 1950 bpMRI with [PI-RADS v2](https://www.sciencedirect.com/science/article/pii/S0302283815008489?via%3Dihub) Annotations [Training:Validation Ratio - 80:20]:**  
-To infer lesion predictions on testing samples using the pre-trained variant [(commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/tree/58b784ffbd2e8c89139c6773cb9490b2fd53d814) of this algorithm, please visit https://grand-challenge.org/algorithms/prostate-mri-cad-cspca/
-
 **Related U-Net Architectures:**  
   ● Probabilistic U-Net: https://github.com/SimonKohl/probabilistic_unet  
   ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
   ● Attention U-Net: https://github.com/ozan-oktay/Attention-Gated-Networks  
   ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
 
+**Note**: This repo will be continually updated upon future advancements and we welcome open-source contributions! Currently, it shares the open-source TensorFlow 2.5 version of the deep attention-driven `3D U-Net (Type:M1)`, as introduced in the publication(s) listed above. Source code used for training this model, as per our original setup, carry a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent MWE adaptation will soon be made available. We encourage users to test out `M1`, identify potential areas for significant improvement and propose PRs for inclusion to this repo.
+
+**Pre-Trained Model using 1950 bpMRI with [PI-RADS v2](https://www.sciencedirect.com/science/article/pii/S0302283815008489?via%3Dihub) Annotations [Training:Validation Ratio - 80:20]:**  
+To infer lesion predictions on testing samples using the pre-trained variant [(commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/tree/58b784ffbd2e8c89139c6773cb9490b2fd53d814) of this algorithm, please visit https://grand-challenge.org/algorithms/prostate-mri-cad-cspca/
+
+● Preprocessing Functions: [`scripts/preprocess.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/preprocess.py)  
+● Tensor-Based Augmentations: [`scripts/model/augmentations.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/model/augmentations.py)   
+● Training Script Template: [`scripts/train_model.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/train_model.py)  
+● Basic Callbacks (e.g. LR Schedules): [`scripts/callbacks.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/callbacks.py)  
+● Loss Functions: [`scripts/model/losses.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/model/losses.py)  
+● Network Architecture: [`scripts/model/unets/networks.py`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/scripts/model/unets/networks.py)  
+#
 <kbd>![schematic](docs/image-1.png)</kbd>
 Train-time schematic for the Bayesian/probabilistic configuration of `3D U-Net (Type:M1)`. `L_KL` denotes the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
 
