@@ -38,7 +38,7 @@ class M1(LoadableModel):
                  strides            = ((1,1,1),(1,2,2),(1,2,2),(2,2,2),(1,2,2)),           
                  kernel_sizes       = ((1,3,3),(1,3,3),(3,3,3),(3,3,3),(3,3,3)),
                  se_reduction       =  (8,8,8,8,8),         
-                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1),(1,1,1)),      
+                 att_sub_samp       = ((1,1,1),(1,1,1),(1,1,1)),      
                  kernel_initializer =   tf.keras.initializers.Orthogonal(gain=1.0, seed=8),
                  bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001, seed=8),
                  kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
@@ -47,6 +47,7 @@ class M1(LoadableModel):
                  probabilistic      =   False,
                  deep_supervision   =   False,
                  proba_event_shape  =   256,
+                 summary            =   True,
                  name               =  'UNET-TYPE-M1'):
 
         # Ensure Correct Dimensionality
@@ -73,7 +74,8 @@ class M1(LoadableModel):
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
                              probabilistic      = probabilistic,
-                             proba_event_shape  = proba_event_shape)
+                             proba_event_shape  = proba_event_shape,
+                             summary            = True)
             
             # For Probabilisitic Outputs
             if probabilistic:
@@ -117,7 +119,8 @@ class M1(LoadableModel):
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
                              probabilistic      = probabilistic,
-                             proba_event_shape  = proba_event_shape)
+                             proba_event_shape  = proba_event_shape,
+                             summary            = True)
 
             # Second-Stage Dual-Attention U-Net Model Definition
             m1_stage2   = m1(inputs             = tf.keras.layers.concatenate([(m1_stage1['prob_softmax'][:,:,:,:,:num_classes-1] \
@@ -135,7 +138,8 @@ class M1(LoadableModel):
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
                              probabilistic      = probabilistic,
-                             proba_event_shape  = proba_event_shape)
+                             proba_event_shape  = proba_event_shape,
+                             summary            = True)
 
             # Coupled Inference via Specified Aggregation Strategy
             prior_pred_train, joint_pred_train     = self.decision_fusion(prior_softmax     = m1_stage1['prob_softmax'][:,:,:,:,num_classes-1] if probabilistic \
