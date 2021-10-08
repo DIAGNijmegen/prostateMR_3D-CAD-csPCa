@@ -123,7 +123,7 @@ class SoftDicePlusBoundarySurface:
         loss_elems    = tf.TensorArray(tf.float32, size=int(y_pred.shape[-1]//y_true.shape[-1]))
 
         for i in tf.range(int(y_pred.shape[-1]//y_true.shape[-1])):
-            loss_elems = loss_elems.write(i, self.FL(y_true, y_pred[...,y_true.shape[-1]*(i)\
+            loss_elems = loss_elems.write(i, self.DB(y_true, y_pred[...,y_true.shape[-1]*(i)\
                                                                        :y_true.shape[-1]*(i+1)]))
         return tf.reduce_mean(loss_elems.stack())
 
