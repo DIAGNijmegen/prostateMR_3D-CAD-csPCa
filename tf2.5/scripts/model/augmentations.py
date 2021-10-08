@@ -145,8 +145,8 @@ def zoom_4D_tensor(input_tensor, binary=False, scale=1.00):
         output_list.append(cropped_img)
     output = tf.stack(output_list)
     
-    if (binary==True):   return tf.cast(output[:,:,:,0], dtype=tf.int32)
-    else:                return tf.cast(output,          dtype=tf.float32)
+    if (binary==True):   return tf.cast(output, dtype=tf.int32)
+    else:                return tf.cast(output, dtype=tf.float32)
 
 
 # Horizontal Flip Augmentation w/ 4D Tensors
@@ -157,8 +157,8 @@ def axial_4D_hflip(input_tensor, binary=False):
         output_list.append(tf.image.flip_left_right(input_tensor[i]))
     output = tf.stack(output_list)
     
-    if (binary==True):   return tf.cast(output[:,:,:,0], dtype=tf.int32)
-    else:                return tf.cast(output,          dtype=tf.float32)
+    if (binary==True):   return tf.cast(output, dtype=tf.int32)
+    else:                return tf.cast(output, dtype=tf.float32)
 
 
 # Translation Augmentation w/ 4D Tensors
@@ -176,8 +176,8 @@ def translate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC',
                                            input_tensor.get_shape()[1], 
                                            input_tensor.get_shape()[2])
     
-    if (binary==True):   return tf.cast(output[:,:,:,0], dtype=tf.int32)
-    else:                return tf.cast(output,          dtype=tf.float32)
+    if (binary==True):   return tf.cast(output, dtype=tf.int32)
+    else:                return tf.cast(output, dtype=tf.float32)
 
 
 # Simulate Poor Inter-Sequence Registration w/ 4D Tensors (Note: Only Works for 3-Channel Images)
@@ -230,8 +230,8 @@ def rotate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC', angle=0):
     ctr_frac    = input_tensor.get_shape()[1]/x.get_shape()[1]
     output      = tf.image.central_crop(x,ctr_frac)
 
-    if (binary==True):   return tf.cast(output[:,:,:,0], dtype=tf.int32)
-    else:                return tf.cast(output,          dtype=tf.float32)
+    if (binary==True):   return tf.cast(output, dtype=tf.int32)
+    else:                return tf.cast(output, dtype=tf.float32)
 
 
 # Simulate Poor Quality Scan (Note: Only Works for 3-Channel bpMRI or 1-Channel T2W)
