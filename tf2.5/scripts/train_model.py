@@ -173,9 +173,9 @@ for f in args.FOLDS:
                                                                           output_shapes = EXPECTED_IO_SHAPE)       # Initialize TensorFlow Dataset
     if str(args.CACHE_TDS_PATH)!='None': 
         train_gen = train_gen.cache(filename=(None if str(args.CACHE_TDS_PATH)=='None' else args.CACHE_TDS_PATH))  # Cache Dataset on Remote Server
+    train_gen     = train_gen.shuffle(int(TRAIN_DATA_SAMPLES*0.50))                                                           # Shuffle Samples
     train_gen     = train_gen.map(lambda x,y: augment_tensors(x,y,args.AUGM_PARAMS,True,args.TRAIN_OBJ), 
                                                               num_parallel_calls=multiprocessing.cpu_count())
-    train_gen     = train_gen.shuffle(args.BATCH_SIZE*8)                                                           # Shuffle Samples
     train_gen     = train_gen.batch(args.BATCH_SIZE)                                                               # Load Data in Batches
     train_gen     = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)                                               # Prefetch Data via CPU while GPU is Training
     print("Complete.")
