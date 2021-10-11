@@ -90,8 +90,8 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
                 cs_pad_bottom  = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*chan_shift_factor), dtype=tf.int32), dtype=tf.int32)  
                 cs_pad_right   = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*chan_shift_factor), dtype=tf.int32), dtype=tf.int32)  
                 cs_pad_left    = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*chan_shift_factor), dtype=tf.int32), dtype=tf.int32)  
-                input_image_1  = tf.cond(trans_prob, lambda: channel_shift_4D_tensor(input_image_1,    pad_top=cs_pad_top,    pad_bottom=cs_pad_bottom,                    
-                                                                               pad_right=cs_pad_right, pad_left=cs_pad_left), lambda: input_image_1)
+                input_image_1  = tf.cond(sim_reg_prob, lambda: channel_shift_4D_tensor(input_image_1,    pad_top=cs_pad_top,    pad_bottom=cs_pad_bottom,                    
+                                                                                 pad_right=cs_pad_right, pad_left=cs_pad_left), lambda: input_image_1)
 
         # Gamma Correction
         if (np.sum(gamma_correct)!=0):
@@ -208,12 +208,14 @@ def channel_shift_4D_tensor(input_tensor, pad_mode='SYMMETRIC',
         if   select_channel==0: output = tf.concat([x,input_tensor[...,1:2],input_tensor[...,2:3]], axis=-1)
         elif select_channel==1: output = tf.concat([input_tensor[...,0:1],x,input_tensor[...,2:3]], axis=-1)
         elif select_channel==2: output = tf.concat([input_tensor[...,0:1],input_tensor[...,1:2],x], axis=-1)
+        else:                   output = tf.identity(input_tensor)  
     if (num_channels>=4):  # Probabilistic: 3 MRI Sequences + Labels
         if   select_channel==0: output = tf.concat([x,input_tensor[...,1:2],input_tensor[...,2:3],input_tensor[...,3:num_channels]], axis=-1)
         elif select_channel==1: output = tf.concat([input_tensor[...,0:1],x,input_tensor[...,2:3],input_tensor[...,3:num_channels]], axis=-1)
         elif select_channel==2: output = tf.concat([input_tensor[...,0:1],input_tensor[...,1:2],x,input_tensor[...,3:num_channels]], axis=-1)
+        else:                   output = tf.identity(input_tensor)  
 
-    return tf.cast(output, dtype=tf.float32)
+    return tf.cast(tf.reshape(output, input_tensor.get_shape()), dtype=tf.float32)
 
 
 # Rotation Augmentation w/ 4D Tensors
@@ -244,22 +246,22 @@ def sim_poor_scan_4D_tensor(input_tensor, train_obj='lesion'):
     num_channels = input_tensor.get_shape()[-1]
 
     if (train_obj=='lesion'):
-        x_0          = sim_poor_scan_3D_tensor(input_tensor[...,0:1])
-        x_1          = sim_poor_scan_3D_tensor(input_tensor[...,1:2])
-        x_2          = sim_poor_scan_3D_tensor(input_tensor[...,2:3])
+        x_0 = sim_poor_scan_3D_tensor(input_tensor[...,0:1])
+        x_1 = sim_poor_scan_3D_tensor(input_tensor[...,1:2])
+        x_2 = sim_poor_scan_3D_tensor(input_tensor[...,2:3])
     
         # Standard: 3 MRI Sequences
-        if (num_channels==3): return tf.cast(tf.concat([x_0,x_1,x_2], axis=-1), tf.float32)
+        if (num_channels==3): return tf.cast(tf.reshape(tf.concat([x_0,x_1,x_2], axis=-1),input_tensor.get_shape()), tf.float32)
         # Probabilistic: 3 MRI Sequences + Labels
-        if (num_channels>=4): return tf.cast(tf.concat([x_0,x_1,x_2,input_tensor[...,3:num_channels]], axis=-1), tf.float32)
+        if (num_channels>=4): return tf.cast(tf.reshape(tf.concat([x_0,x_1,x_2,input_tensor[...,3:num_channels]], axis=-1),input_tensor.get_shape()), tf.float32)
 
     elif (train_obj=='zonal'):
-        x_0          = sim_poor_scan_3D_tensor(input_tensor[...,0:1])
+        x_0 = sim_poor_scan_3D_tensor(input_tensor[...,0:1])
     
         # Standard: 1 MRI Sequence
-        if (num_channels==1): return tf.cast(x_0, tf.float32)
+        if (num_channels==1): return tf.cast(tf.reshape(x_0,input_tensor.get_shape()), tf.float32)
         # Probabilistic: 1 MRI Sequence + Labels
-        if (num_channels>=2): return tf.cast(tf.concat([x_0,input_tensor[...,1:num_channels]], axis=-1), tf.float32)
+        if (num_channels>=2): return tf.cast(tf.reshape(tf.concat([x_0,input_tensor[...,1:num_channels]], axis=-1),input_tensor.get_shape()), tf.float32)
 
 
 # Channel-Wise Simulate Poor Quality Scan
@@ -278,22 +280,22 @@ def gamma_shift_4D_tensor(input_tensor, gamma=1, train_obj='lesion'):
     num_channels = input_tensor.get_shape()[-1]
 
     if (train_obj=='lesion'):
-        x_0          = gamma_shift_3D_tensor(input_tensor[...,0:1],gamma)
-        x_1          = gamma_shift_3D_tensor(input_tensor[...,1:2],gamma)
-        x_2          = gamma_shift_3D_tensor(input_tensor[...,2:3],gamma)
+        x_0 = gamma_shift_3D_tensor(input_tensor[...,0:1],gamma)
+        x_1 = gamma_shift_3D_tensor(input_tensor[...,1:2],gamma)
+        x_2 = gamma_shift_3D_tensor(input_tensor[...,2:3],gamma)
     
         # Standard: 3 MRI Sequences
-        if (num_channels==3): return tf.cast(tf.concat([x_0,x_1,x_2], axis=-1), tf.float32)
+        if (num_channels==3): return tf.cast(tf.reshape(tf.concat([x_0,x_1,x_2], axis=-1),input_tensor.get_shape()), tf.float32)
         # Probabilistic: 3 MRI Sequences + Labels
-        if (num_channels>=4): return tf.cast(tf.concat([x_0,x_1,x_2,input_tensor[...,3:num_channels]], axis=-1), tf.float32)
+        if (num_channels>=4): return tf.cast(tf.reshape(tf.concat([x_0,x_1,x_2,input_tensor[...,3:num_channels]], axis=-1),input_tensor.get_shape()), tf.float32)
 
     elif (train_obj=='zonal'):
-        x_0          = gamma_shift_3D_tensor(input_tensor[...,0:1],gamma)
+        x_0 = gamma_shift_3D_tensor(input_tensor[...,0:1],gamma)
     
         # Standard: 1 MRI Sequence
-        if (num_channels==1): return tf.cast(x_0, tf.float32)
+        if (num_channels==1): return tf.cast(tf.reshape(x_0,input_tensor.get_shape()), tf.float32)
         # Probabilistic: 1 MRI Sequence + Labels
-        if (num_channels>=2): return tf.cast(tf.concat([x_0,input_tensor[...,1:num_channels]], axis=-1), tf.float32)
+        if (num_channels>=2): return tf.cast(tf.reshape(tf.concat([x_0,input_tensor[...,1:num_channels]], axis=-1),input_tensor.get_shape()), tf.float32)
     
 
 # Channel-Wise Gamma Boost/Suppress
@@ -316,13 +318,16 @@ def gamma_shift_3D_tensor(x, gamma):
 def gaussian_noise_4D_tensor(input_tensor, stddev=1.0, train_obj='lesion'):
 
     if (train_obj=='lesion'):
-        noise = tf.random.normal(shape=input_tensor[...,:3].get_shape(), 
-                                 mean=0.0, stddev=stddev, dtype=tf.float32)
-    if (train_obj=='zonal'):
-        noise = tf.random.normal(shape=input_tensor[...,:1].get_shape(), 
-                                 mean=0.0, stddev=stddev, dtype=tf.float32)
+        noise  = tf.random.normal(shape=input_tensor[...,:3].get_shape(), 
+                                  mean=0.0, stddev=stddev, dtype=tf.float32)
+        output = tf.concat([tf.add(input_tensor[...,:3],noise),input_tensor[...,3:]], axis=-1)
 
-    return tf.cast(tf.add(input_tensor,noise), dtype=tf.float32)
+    if (train_obj=='zonal'):
+        noise  = tf.random.normal(shape=input_tensor[...,:1].get_shape(), 
+                                  mean=0.0, stddev=stddev, dtype=tf.float32)
+        output = tf.concat([tf.add(input_tensor[...,:1],noise),input_tensor[...,1:]], axis=-1)
+
+    return tf.cast(tf.reshape(output, input_tensor.get_shape()), dtype=tf.float32)
 
 
 
