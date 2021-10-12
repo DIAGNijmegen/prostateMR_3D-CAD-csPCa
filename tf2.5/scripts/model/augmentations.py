@@ -101,11 +101,11 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
 
         # Simulate Poor Quality Scan
         if (sim_poor_scan!=False):
-            poor_scan_prob = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                        
+            poor_scan_prob = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob/2)                                                        
             input_image_1  = tf.cond(poor_scan_prob, lambda: sim_poor_scan_4D_tensor(input_image_1, train_obj=train_obj), lambda: input_image_1)   
 
         # Additive Gaussian Noise Probability and Augmentation
-        if (gauss_noise_stddev!=False):
+        if (gauss_noise_stddev!=0):
             gauss_prob     = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                      
             stddev         = tf.random.uniform(shape=[], minval=0, maxval=gauss_noise_stddev, dtype=tf.float32)                                              
             input_image_1  = tf.cond(gauss_prob, lambda: gaussian_noise_4D_tensor(input_image_1, stddev=stddev, train_obj=train_obj), lambda: input_image_1)   
@@ -121,10 +121,10 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
     
         # Sanity-Check (Label Swaps From Augmentations)
         if debug_on:
-            label_swap_flag = tf.cond(tf.math.reduce_max(tf.math.ceil(targets["detection"]))==tf.math.reduce_max(tf.math.ceil(target_label_1)), lambda: 1, lambda: 0)
+            label_swap_flag = tf.cond(tf.math.ceil(tf.math.reduce_max(targets["detection"]))==tf.math.ceil(tf.math.reduce_max(target_label_1)), lambda: 1, lambda: 0)
             if (label_swap_flag==0):
-                tf.print(tf.math.reduce_max(tf.math.ceil(targets["detection"])), output_stream=sys.stdout)
-                tf.print(tf.math.reduce_max(tf.math.ceil(target_label_1)),       output_stream=sys.stdout)
+                tf.print(tf.math.ceil(tf.math.reduce_max(targets["detection"])), output_stream=sys.stdout)
+                tf.print(tf.math.ceil(tf.math.reduce_max(target_label_1)),       output_stream=sys.stdout)
 
         features["image"]    = tf.identity(input_image_1)  
         targets["detection"] = tf.identity(target_label_1)  
