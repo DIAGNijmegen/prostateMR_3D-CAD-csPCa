@@ -89,7 +89,7 @@ prsr.add_argument('--FOCAL_LOSS_ALPHA',    type=float, default=[1.00, 1.00],    
 prsr.add_argument('--FOCAL_LOSS_GAMMA',    type=float, default=2.0,                                                                       help="Focal Loss (gamma). Note: When gamma=0; FL reduces down to CE/BCE.")
 prsr.add_argument('--DSC_BD_LOSS_WEIGHTS', type=float, default=[0.50, 0.50],                                                              help="Soft Dice + Boundary Loss (weights)")
 prsr.add_argument('--ELBO_LOSS_PARAMS',    type=float, default=[1.0],                                                                     help="Evidence Lower Bound Loss for Prob Dist. (weight)")
-prsr.add_argument('--AUGM_PARAMS',         type=float, default=[1.00, 0.25, 0.15, 10.0, True, 1.20, 0.15, 0.025, True, [0.75, 1.50]],     help="Train-Time Augmentations (M_PROB,TX_PROB,TRANS,ROT,HFLIP,SCALE,\
+prsr.add_argument('--AUGM_PARAMS',         type=float, default=[1.00, 0.25, 0.15, 10.0, True, 1.20, 0.15, 0.025, True, [0.50, 1.50]],     help="Train-Time Augmentations (M_PROB,TX_PROB,TRANS,ROT,HFLIP,SCALE,\
                                                                                                                                                                           NOISE,C_SHIFT,POOR_QUAL,GAMMA)")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 args, _ = prsr.parse_known_args()
@@ -174,7 +174,7 @@ for f in args.FOLDS:
     if str(args.CACHE_TDS_PATH)!='None': 
         train_gen = train_gen.cache(filename=(None if str(args.CACHE_TDS_PATH)=='None' else args.CACHE_TDS_PATH))  # Cache Dataset on Remote Server
     train_gen     = train_gen.shuffle(int(TRAIN_DATA_SAMPLES*0.50))                                                           # Shuffle Samples
-    train_gen     = train_gen.map(lambda x,y: augment_tensors(x,y,args.AUGM_PARAMS,True,args.TRAIN_OBJ), 
+    train_gen     = train_gen.map(lambda x,y: augment_tensors(x,y,args.AUGM_PARAMS,args.TRAIN_OBJ), 
                                                               num_parallel_calls=multiprocessing.cpu_count())
     train_gen     = train_gen.batch(args.BATCH_SIZE)                                                               # Load Data in Batches
     train_gen     = train_gen.prefetch(buffer_size=tf.data.AUTOTUNE)                                               # Prefetch Data via CPU while GPU is Training

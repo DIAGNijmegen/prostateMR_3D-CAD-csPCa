@@ -33,7 +33,7 @@ Update:         07/10/2021
 
 
 # Tensor-Based Morphological Augmentations
-def augment_tensors(features, targets, augmentation_params, soft_labels=False, train_obj='lesion', debug_on=False):
+def augment_tensors(features, targets, augmentation_params, train_obj='lesion', debug_on=False):
 
     # Extract Augmentation Hyperparameters
     prob                = augmentation_params[0]
@@ -54,15 +54,12 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
         input_image_1  = tf.identity(features["image"])
         target_label_1 = tf.identity(targets["detection"])
 
-        # Translation Probability, Offset Values and Augmentation    
-        if (translate_factor!=0.00): 
-            trans_prob     = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                      
-            pad_top        = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
-            pad_bottom     = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
-            pad_right      = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
-            pad_left       = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
-            input_image_1  = tf.cond(trans_prob, lambda: translate_4D_tensor(input_image_1, pad_top=pad_top,     pad_bottom=pad_bottom,                    
-                                                                       pad_right=pad_right, pad_left=pad_left), lambda: input_image_1)  
+        # Scaling Probability and Augmentation
+        if (zoom_factor!=0.00):
+            zoom_prob      = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                     
+            scale          = tf.random.uniform(shape=[], minval=tf.cast(float(input_image_1.get_shape()[1]), dtype=tf.int32),\
+                                                         maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*zoom_factor), dtype=tf.int32), dtype=tf.int32)          
+            input_image_1  = tf.cond(zoom_prob, lambda: zoom_4D_tensor(input_image_1, scale=scale), lambda: input_image_1)                    
 
         # Horizontal Flipping Along Axial Plane Probability and Augmentation
         if (axial_hflip==True):
@@ -73,14 +70,17 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
         if (rotation_degree!=0):
             rot_prob       = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                      
             angle          = tf.random.uniform(shape=[], minval=-rotation_degree, maxval=rotation_degree, dtype=tf.float32)                                  
-            input_image_1  = tf.cond(rot_prob, lambda: rotate_4D_tensor(input_image_1,  angle=angle), lambda: input_image_1)                
-               
-        # Scaling Probability and Augmentation
-        if (zoom_factor!=0.00):
-            zoom_prob      = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                     
-            scale          = tf.random.uniform(shape=[], minval=tf.cast(float(input_image_1.get_shape()[1]), dtype=tf.int32),\
-                                                         maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*zoom_factor), dtype=tf.int32), dtype=tf.int32)          
-            input_image_1  = tf.cond(zoom_prob, lambda: zoom_4D_tensor(input_image_1, scale=scale), lambda: input_image_1)                    
+            input_image_1  = tf.cond(rot_prob, lambda: rotate_4D_tensor(input_image_1,  angle=angle), lambda: input_image_1)                               
+
+        # Translation Probability, Offset Values and Augmentation    
+        if (translate_factor!=0.00): 
+            trans_prob     = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                      
+            pad_top        = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
+            pad_bottom     = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[1]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
+            pad_right      = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
+            pad_left       = tf.random.uniform(shape=[], minval=0, maxval=tf.cast(tf.math.ceil(input_image_1.get_shape()[2]*translate_factor), dtype=tf.int32), dtype=tf.int32)   
+            input_image_1  = tf.cond(trans_prob, lambda: translate_4D_tensor(input_image_1, pad_top=pad_top,     pad_bottom=pad_bottom,                    
+                                                                       pad_right=pad_right, pad_left=pad_left), lambda: input_image_1)  
 
         if (train_obj=='lesion'):
             # Simulate Inter-Sequence Registration Error
@@ -101,7 +101,7 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
 
         # Simulate Poor Quality Scan
         if (sim_poor_scan!=False):
-            poor_scan_prob = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob/2)                                                        
+            poor_scan_prob = tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(tx_prob)                                                        
             input_image_1  = tf.cond(poor_scan_prob, lambda: sim_poor_scan_4D_tensor(input_image_1, train_obj=train_obj), lambda: input_image_1)   
 
         # Additive Gaussian Noise Probability and Augmentation
@@ -111,14 +111,14 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
             input_image_1  = tf.cond(gauss_prob, lambda: gaussian_noise_4D_tensor(input_image_1, stddev=stddev, train_obj=train_obj), lambda: input_image_1)   
 
         # Label Augmentations
+        if (zoom_factor!=0.00):  target_label_1 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_1,   scale=scale), lambda: target_label_1)
+        if (axial_hflip==True):  target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1,                 lambda: target_label_1)                
+        if (rotation_degree!=0): target_label_1 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_1, angle=angle), lambda: target_label_1)        
+
         if (translate_factor!=0.00):
-            target_label_1   = tf.cond(trans_prob, lambda: translate_4D_tensor(target_label_1, binary=(not soft_labels), 
+            target_label_1   = tf.cond(trans_prob, lambda: translate_4D_tensor(target_label_1, 
                pad_top=pad_top, pad_bottom=pad_bottom, pad_right=pad_right, pad_left=pad_left), lambda: target_label_1)
 
-        if (axial_hflip==True):  target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1,   binary=(not soft_labels)),               lambda: target_label_1)                
-        if (rotation_degree!=0): target_label_1 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_1, binary=(not soft_labels),  angle=angle), lambda: target_label_1)        
-        if (zoom_factor!=0.00):  target_label_1 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_1,   binary=(not soft_labels),  scale=scale), lambda: target_label_1)
-    
         # Sanity-Check (Label Swaps From Augmentations)
         if debug_on:
             label_swap_flag = tf.cond(tf.math.ceil(tf.math.reduce_max(targets["detection"]))==tf.math.ceil(tf.math.reduce_max(target_label_1)), lambda: 1, lambda: 0)
@@ -136,7 +136,7 @@ def augment_tensors(features, targets, augmentation_params, soft_labels=False, t
 
 
 # Scaling Augmentation w/ 4D Tensors
-def zoom_4D_tensor(input_tensor, binary=False, scale=1.00):
+def zoom_4D_tensor(input_tensor, scale=1.00):
     output_list = []
         
     for i in range(input_tensor.get_shape()[0]):
@@ -149,24 +149,22 @@ def zoom_4D_tensor(input_tensor, binary=False, scale=1.00):
         output_list.append(cropped_img)
     output = tf.stack(output_list)
     
-    if (binary==True):   return tf.cast(output, dtype=tf.int32)
-    else:                return tf.cast(output, dtype=tf.float32)
+    return tf.cast(output, dtype=tf.float32)
 
 
 # Horizontal Flip Augmentation w/ 4D Tensors
-def axial_4D_hflip(input_tensor, binary=False):
+def axial_4D_hflip(input_tensor):
     output_list = []
         
     for i in range(input_tensor.get_shape()[0]):
         output_list.append(tf.image.flip_left_right(input_tensor[i]))
     output = tf.stack(output_list)
     
-    if (binary==True):   return tf.cast(output, dtype=tf.int32)
-    else:                return tf.cast(output, dtype=tf.float32)
+    return tf.cast(output, dtype=tf.float32)
 
 
 # Translation Augmentation w/ 4D Tensors
-def translate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC',
+def translate_4D_tensor(input_tensor, pad_mode='SYMMETRIC',
                         pad_top=0, pad_bottom=0, pad_right=0, pad_left=0):
         
     # Translation + Padding
@@ -180,8 +178,7 @@ def translate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC',
                                            input_tensor.get_shape()[1], 
                                            input_tensor.get_shape()[2])
     
-    if (binary==True):   return tf.cast(output, dtype=tf.int32)
-    else:                return tf.cast(output, dtype=tf.float32)
+    return tf.cast(output, dtype=tf.float32)
 
 
 # Simulate Poor Inter-Sequence Registration w/ 4D Tensors (Note: Only Works for 3-Channel Images)
@@ -219,7 +216,7 @@ def channel_shift_4D_tensor(input_tensor, pad_mode='SYMMETRIC',
 
 
 # Rotation Augmentation w/ 4D Tensors
-def rotate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC', angle=0):   
+def rotate_4D_tensor(input_tensor, pad_mode='SYMMETRIC', angle=0):   
     
     # Translation Offset Values
     diagonal    = ((input_tensor.get_shape()[1])**2+(input_tensor.get_shape()[2])**2)**0.5
@@ -236,8 +233,7 @@ def rotate_4D_tensor(input_tensor, binary=False, pad_mode='SYMMETRIC', angle=0):
     ctr_frac    = input_tensor.get_shape()[1]/x.get_shape()[1]
     output      = tf.image.central_crop(x,ctr_frac)
 
-    if (binary==True):   return tf.cast(output, dtype=tf.int32)
-    else:                return tf.cast(output, dtype=tf.float32)
+    return tf.cast(output, dtype=tf.float32)
 
 
 # Simulate Poor Quality Scan (Note: Only Works for 3-Channel bpMRI or 1-Channel T2W)
@@ -268,8 +264,8 @@ def sim_poor_scan_4D_tensor(input_tensor, train_obj='lesion'):
 def sim_poor_scan_3D_tensor(x):
     if tf.random.uniform(shape=[], minval=0, maxval=1, dtype=tf.float32)>(0.50):
         
-        x_ = tf.image.resize(x, (x.get_shape()[1]//2, x.get_shape()[1]//2), method='bilinear')
-        x_ = tf.image.resize(x_,(x.get_shape()[1],    x.get_shape()[1]),    method='nearest')
+        x_ = tf.image.resize(x, (int(x.get_shape()[1]*0.75), int(x.get_shape()[1]*0.75)), method='bilinear')
+        x_ = tf.image.resize(x_,(int(x.get_shape()[1]),      int(x.get_shape()[1])),      method='nearest')
 
         return tf.cast(x_, tf.float32)
     else: return tf.cast(tf.identity(x), tf.float32)
