@@ -112,7 +112,7 @@ def augment_tensors(features, targets, augmentation_params, train_obj='lesion', 
 
         # Label Augmentations
         if (zoom_factor!=0.00):  target_label_1 = tf.cond(zoom_prob, lambda: zoom_4D_tensor(target_label_1,   scale=scale), lambda: target_label_1)
-        if (axial_hflip==True):  target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1,                 lambda: target_label_1)                
+        if (axial_hflip==True):  target_label_1 = tf.cond(flip_prob, lambda: axial_4D_hflip(target_label_1),                lambda: target_label_1)                
         if (rotation_degree!=0): target_label_1 = tf.cond(rot_prob,  lambda: rotate_4D_tensor(target_label_1, angle=angle), lambda: target_label_1)        
 
         if (translate_factor!=0.00):
