@@ -44,8 +44,8 @@ class M1(LoadableModel):
                  kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                  bias_regularizer   =   tf.keras.regularizers.l2(1e-4),         
                  cascaded           =   False,
-                 probabilistic      =   False,
                  deep_supervision   =   False,
+                 probabilistic      =   False,
                  proba_event_shape  =   256,
                  summary            =   True,
                  name               =  'UNET-TYPE-M1'):
@@ -73,6 +73,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              proba_event_shape  = proba_event_shape,
                              summary            = True)
@@ -118,6 +119,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              proba_event_shape  = proba_event_shape,
                              summary            = True)
@@ -137,6 +139,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              proba_event_shape  = proba_event_shape,
                              summary            = True)
