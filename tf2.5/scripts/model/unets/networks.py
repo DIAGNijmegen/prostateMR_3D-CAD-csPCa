@@ -563,8 +563,8 @@ def m1(inputs, num_classes,
     if deep_supervision:
         # Upsample Feature Maps to Original Resolution
         y_1     = tf.keras.layers.UpSampling3D(size=np.array(strides[1])                                          )(uconv1)
-        y_2     = tf.keras.layers.UpSampling3D(size=np.array(strides[2])*np.array(strides[3])                     )(uconv2)
-        y_3     = tf.keras.layers.UpSampling3D(size=np.array(strides[3])*np.array(strides[3])*np.array(strides[3]))(uconv3)
+        y_2     = tf.keras.layers.UpSampling3D(size=np.array(strides[1])*np.array(strides[2])                     )(uconv2)
+        y_3     = tf.keras.layers.UpSampling3D(size=np.array(strides[1])*np.array(strides[2])*np.array(strides[3]))(uconv3)
         # Generate Logits
         y_1     = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), **conv_params)(y_1)
         y_2     = tf.keras.layers.Conv3D(filters=num_classes, kernel_size=(1,1,1), strides=(1,1,1), **conv_params)(y_2)
