@@ -549,7 +549,6 @@ def m1(inputs, num_classes,
     # Decoder: Nested U-Net - Stage 0
     deconv0     = tf.keras.layers.Conv3DTranspose(filters=filters[0], kernel_size=kernel_sizes[1], strides=strides[1], padding="same")(uconv1)
     uconv0      = tf.keras.layers.concatenate([deconv0, deconv1_up1, deconv2_up2, deconv3_up3, att_conv0])   
-    uconv0      = tf.keras.layers.Conv3DTranspose(filters=filters[0], kernel_size=kernel_sizes[1], strides=strides[1], padding="same")(uconv1)   
     uconv0      = SEResNetBottleNeck(filters=filters[0], kernel_size=kernel_sizes[0], strides=(1,1,1), reduction=se_reduction[0], conv_params=conv_params)(uconv0)
     uconv0      = DropoutFunc(dropout_rate/2)(uconv0)
 
