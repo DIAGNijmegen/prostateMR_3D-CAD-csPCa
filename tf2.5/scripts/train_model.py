@@ -114,8 +114,8 @@ for f in args.FOLDS:
     else: BASE_LR = args.BASE_LR
 
     # Optimizer Setup
-    if   (args.OPTIMIZER=='adam'):     OPTIMIZER_SET = tf.keras.optimizers.Adam(learning_rate=args.BASE_LR, amsgrad=True)
-    elif (args.OPTIMIZER=='momentum'): OPTIMIZER_SET = tf.keras.optimizers.SGD(learning_rate=args.BASE_LR,  nesterov=True, momentum=0.90)
+    if   (args.OPTIMIZER=='adam'):     OPTIMIZER_SET = tf.keras.optimizers.Adam(learning_rate=BASE_LR, amsgrad=True)
+    elif (args.OPTIMIZER=='momentum'): OPTIMIZER_SET = tf.keras.optimizers.SGD(learning_rate=BASE_LR,  nesterov=True, momentum=0.90)
     
     # Segmentation/Detection Loss Function Setup
     if   (args.LOSS_MODE=='distribution_focal'): LOSSES = [losses.Focal(alpha=args.FOCAL_LOSS_ALPHA, gamma=args.FOCAL_LOSS_GAMMA).loss]   
