@@ -1,21 +1,5 @@
 # Clinically Significant Prostate Cancer Detection in bpMRI
 
-**Related Publications:**  
-● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
-  Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
-
-● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
-  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
-
-**Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
-#
-
-**Related U-Net Architectures:**  
-  ● Hierarchical Probabilistic U-Net: https://github.com/deepmind/deepmind-research/tree/master/hierarchical_probabilistic_unet  
-  ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
-  ● Attention U-Net: https://github.com/ozan-oktay/Attention-Gated-Networks  
-  ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
-
 **Note**: This repo will be continually updated upon future advancements and we welcome open-source contributions! Currently, it shares the open-source TensorFlow 2.5 version of the deep attention-driven `3D U-Net (Type:M1)`, as introduced in the publication(s) listed above. Source code used for training this model, as per our original setup, carry a large number of dependencies on internal datasets, tooling, infrastructure and hardware, and their release is currently not feasible. However, an equivalent minimal adaptation has been made available. We encourage users to test out `M1`, identify potential areas for significant improvement and propose PRs for inclusion to this repo.
 
 **Pre-Trained Model using 1950 bpMRI with [PI-RADS v2](https://www.sciencedirect.com/science/article/pii/S0302283815008489?via%3Dihub) Annotations [Training:Validation Ratio - 80:20]:**  
@@ -77,6 +61,20 @@ unet_model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=LR_SCHEDUL
 unet_model.fit(...)
 ```
 
+**Related Publications:**  
+● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
+  Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
+
+● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
+  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
+
+**Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
+
+**Related U-Net Architectures:**  
+  ● Hierarchical Probabilistic U-Net: https://github.com/deepmind/deepmind-research/tree/master/hierarchical_probabilistic_unet  
+  ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
+  ● Attention U-Net: https://github.com/ozan-oktay/Attention-Gated-Networks  
+  ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
 
 
 
