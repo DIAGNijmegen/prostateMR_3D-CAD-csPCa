@@ -25,18 +25,18 @@ class Focal:
       'y_true': One-Hot Encoded Label
     """
     def __init__(self, alpha=[0.25, 0.75], gamma=2.00):
-        self.alpha    = alpha
-        self.gamma    = gamma
+        self.alpha    =  alpha
+        self.gamma    =  gamma
 
     # Loss Function
     def FL(self, y_true, y_pred):
-        class_weights = tf.convert_to_tensor(self.alpha, dtype=tf.float32)        
-        y_pred       /= tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)                        
-        y_pred        = tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1-tf.keras.backend.epsilon()) 
-        ce            = tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
-        gamma_weight  = tf.math.multiply(tf.cast(y_true, tf.float32),  tf.math.pow(tf.math.subtract(1.0, y_pred), self.gamma))
-        fl            = tf.math.multiply(class_weights, tf.math.multiply(gamma_weight, ce))
-        return tf.reduce_mean(fl)
+        class_weights =  tf.convert_to_tensor(self.alpha, dtype=tf.float32)        
+        y_pred       /=  tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)                        
+        y_pred        =  tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1-tf.keras.backend.epsilon()) 
+        ce            =  tf.math.multiply(tf.cast(y_true, tf.float32), -tf.math.log(y_pred))
+        gamma_weight  =  tf.math.multiply(tf.cast(y_true, tf.float32),  tf.math.pow(tf.math.subtract(1.0, y_pred), self.gamma))
+        fl            =  tf.math.multiply(class_weights, tf.math.multiply(gamma_weight, ce))
+        return tf.reduce_mean(tf.reduce_sum(fl, [1,2,3,4]), 0)
 
     # Wrapper for Optimizing Single/Multiple Predictions Against Same Label (e.g. Deep Supervision)
     # [Ref: https://www.tensorflow.org/guide/function#loops]
@@ -60,7 +60,7 @@ class EvidenceLowerBound:
         self.beta     = beta
 
     def loss(self, y_true, y_pred):
-        return (self.beta * tf.reduce_mean(y_pred))
+        return (self.beta * tf.reduce_sum(y_pred))
 
 
 class SoftDicePlusBoundarySurface:
@@ -103,14 +103,14 @@ class SoftDicePlusBoundarySurface:
         y_pred_f   = tf.keras.backend.flatten(y_pred[...,1:])
         intersect  = tf.reduce_sum(y_true_f * y_pred_f, axis=-1)
         denom      = tf.reduce_sum(y_true_f + y_pred_f, axis=-1)
-        return 1-tf.reduce_mean((2. * intersect / (denom + self.smooth)))
+        return 1-tf.reduce_sum((2. * intersect / (denom + self.smooth)))
 
     # Boundary Loss Function
     def boundary_surface_loss(self, y_true, y_pred):
         y_pred         /= tf.keras.backend.sum(y_pred, axis=-1, keepdims=True)                        
         y_pred          = tf.keras.backend.clip(y_pred, tf.keras.backend.epsilon(), 1-tf.keras.backend.epsilon()) 
         y_true_dist_map = tf.py_function(func=self.calc_dist_map_batch, inp=[y_true[...,1:]], Tout=tf.float32)
-        return tf.reduce_mean((y_pred[...,1:]*y_true_dist_map))
+        return tf.reduce_sum((y_pred[...,1:]*y_true_dist_map))
 
     # Composite Loss Function
     def DB(self, y_true, y_pred):
@@ -126,4 +126,5 @@ class SoftDicePlusBoundarySurface:
             loss_elems = loss_elems.write(i, self.DB(y_true, y_pred[...,y_true.shape[-1]*(i)\
                                                                        :y_true.shape[-1]*(i+1)]))
         return tf.reduce_mean(loss_elems.stack())
+
 
