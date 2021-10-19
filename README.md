@@ -18,10 +18,10 @@ To infer lesion predictions on testing samples using the pre-trained variant [(a
 ● Key Python Packages: [`tf2.5/requirements.txt`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/requirements.txt)  
 
 <kbd>![schematic](docs/image-1.png)</kbd>
-Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `3D U-Net (Type:M1)`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
+Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `M1`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
 
 <kbd>![schematic](docs/image-2.png)</kbd>
-Architecture schematic of the `3D U-Net (Type:M1)` with attention mechanisms and a nested decoder structure with deep supervision.
+Architecture schematic of the `M1`, with attention mechanisms and a nested decoder structure with deep supervision.
 
 **Minimal Example of Model Setup in TensorFlow 2.5:**  
 *(More Details: [Training CNNs in TF2: Walkthrough](https://www.tensorflow.org/tutorials/images/segmentation); [TF2 Datasets: Best Practices](https://www.tensorflow.org/guide/data_performance); [TensorFlow Probability](https://www.tensorflow.org/probability))*
