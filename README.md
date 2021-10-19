@@ -71,10 +71,10 @@ unet_model.fit(...)
 **Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
 
 **Related U-Net Architectures:**  
-  ● Hierarchical Probabilistic U-Net: https://github.com/deepmind/deepmind-research/tree/master/hierarchical_probabilistic_unet  
   ● nnU-Net: https://github.com/MIC-DKFZ/nnUNet  
   ● Attention U-Net: https://github.com/ozan-oktay/Attention-Gated-Networks  
   ● UNet++: https://github.com/MrGiovanni/UNetPlusPlus  
+  ● Hierarchical Probabilistic U-Net: https://github.com/deepmind/deepmind-research/tree/master/hierarchical_probabilistic_unet  
 
 
 
