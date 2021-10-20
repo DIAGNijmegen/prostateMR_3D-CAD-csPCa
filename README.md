@@ -18,7 +18,7 @@ To infer lesion predictions on testing samples using the pre-trained variant [(a
 ● Key Python Packages: [`tf2.5/requirements.txt`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/requirements.txt)  
 
 <kbd>![schematic](docs/image-1.png)</kbd>
-Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `M1`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, latent samples `z_i ∈ Q` (train-time) or `z_i ∈ P` (test-time) are successively drawn across at increasing scales of the model to predict one segmentation mask `p`.
+Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `M1`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, latent samples `z_i ∈ Q` (train-time) or `z_i ∈ P` (test-time) are successively drawn at increasing scales of the model to predict one segmentation mask `p`.
 
 <kbd>![schematic](docs/image-2.png)</kbd>
 Architecture schematic of `M1`, with attention mechanisms and a nested decoder structure with deep supervision.
