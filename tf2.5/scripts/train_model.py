@@ -66,7 +66,7 @@ prsr.add_argument('--GPU_DEVICE_IDs',             type=str,   default="0",      
 # U-Net Hyperparameters
 prsr.add_argument('--UNET_DEEP_SUPERVISION',      type=int,   default=0,                                                                   help="U-Net: Enable Deep Supervision")
 prsr.add_argument('--UNET_PROBABILISTIC',         type=int,   default=0,                                                                   help="U-Net: Enable Probabilistic/Bayesian Output Computation")
-prsr.add_argument('--UNET_PROBA_LATENT_DIMS',     type=int,   default=[3,2,1,0],                                                           help="U-Net: Probabilistic Latent Dimensions at Each Resolution")
+prsr.add_argument('--UNET_PROBA_LATENT_DIMS',     type=int,   default=[3,2,1,0],                                                nargs='+', help="U-Net: Probabilistic Latent Dimensions at Each Resolution")
 prsr.add_argument('--UNET_PROBA_ITER',            type=int,   default=1,                                                                   help="U-Net: Iterations of Probabilistic Inference During Validation")
 prsr.add_argument('--UNET_FEATURE_CHANNELS',      type=int,   default=[16,32,64,128,256],                                       nargs='+', help="U-Net: Encoder/Decoder Channels")
 prsr.add_argument('--UNET_STRIDES',               type=int,   default=[(1,1,1),(1,2,2),(1,2,2),(2,2,2),(2,2,2)],                nargs='+', help="U-Net: Down/Upsampling Factor per Resolution")
@@ -79,19 +79,19 @@ prsr.add_argument('--UNET_DROPOUT_MODE',          type=str,   default="monte-car
 prsr.add_argument('--UNET_DROPOUT_RATE',          type=float, default=0.50,                                                                help="U-Net: Dropout Regularization Rate")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Training Hyperparameters
-prsr.add_argument('--BATCH_SIZE',          type=int,   default=2,                                                                          help="Batch Size")
-prsr.add_argument('--BASE_LR',             type=float, default=1e-3,                                                                       help="Base Learning Rate")
-prsr.add_argument('--LR_MODE',             type=str,   default="CALR",                                                                     help="Learning Rate Mode: 'CLR'/'CALR'")
-prsr.add_argument('--CALR_PARAMS',         type=float, default=[2.00, 1.00, 1e-3],                                                         help="'CosineDecayRestarts': t_mul, m_mul, alpha")
-prsr.add_argument('--CLR_PARAMS',          type=float, default=[5e-5, 1.00, 1.25],                                                         help="'CyclicLR': Max LR, Decay Factor, Step Factor")
-prsr.add_argument('--OPTIMIZER',           type=str,   default="adam",                                                                     help="Optimizer: 'adam'/'momentum'")
-prsr.add_argument('--LOSS_MODE',           type=str,   default="distribution_focal",                                                       help="Loss: 'distribution_focal'/'region_boundary'")
-prsr.add_argument('--FOCAL_LOSS_ALPHA',    type=float, default=[1.00, 1.00],                                                    nargs='+', help="Focal Loss (alpha)")
-prsr.add_argument('--FOCAL_LOSS_GAMMA',    type=float, default=2.0,                                                                        help="Focal Loss (gamma). Note: When gamma=0; FL reduces down to CE/BCE.")
-prsr.add_argument('--DSC_BD_LOSS_WEIGHTS', type=float, default=[0.50, 0.50],                                                               help="Soft Dice + Boundary Loss (weights)")
-prsr.add_argument('--ELBO_LOSS_PARAMS',    type=float, default=[10],                                                                       help="Evidence Lower Bound Loss for Prob Dist. (weight)")
-prsr.add_argument('--AUGM_PARAMS',         type=float, default=[1.00, 0.25, 0.15, 10.0, True, 1.20, 0.10, 0.025, True, [0.50, 1.50]],      help="Train-Time Augmentations (M_PROB,TX_PROB,TRANS,ROT,HFLIP,SCALE,\
-                                                                                                                                                                           NOISE,C_SHIFT,POOR_QUAL,GAMMA)")
+prsr.add_argument('--BATCH_SIZE',          type=int,   default=2,                                                                                help="Batch Size")
+prsr.add_argument('--BASE_LR',             type=float, default=1e-3,                                                                             help="Base Learning Rate")
+prsr.add_argument('--LR_MODE',             type=str,   default="CALR",                                                                           help="Learning Rate Mode: 'CLR'/'CALR'")
+prsr.add_argument('--CALR_PARAMS',         type=float, default=[2.00, 1.00, 1e-3],                                                    nargs='+', help="'CosineDecayRestarts': t_mul, m_mul, alpha")
+prsr.add_argument('--CLR_PARAMS',          type=float, default=[5e-5, 1.00, 1.25],                                                    nargs='+', help="'CyclicLR': Max LR, Decay Factor, Step Factor")
+prsr.add_argument('--OPTIMIZER',           type=str,   default="adam",                                                                           help="Optimizer: 'adam'/'momentum'")
+prsr.add_argument('--LOSS_MODE',           type=str,   default="distribution_focal",                                                             help="Loss: 'distribution_focal'/'region_boundary'")
+prsr.add_argument('--FOCAL_LOSS_ALPHA',    type=float, default=[1.00, 1.00],                                                          nargs='+', help="Focal Loss (alpha)")
+prsr.add_argument('--FOCAL_LOSS_GAMMA',    type=float, default=2.0,                                                                              help="Focal Loss (gamma). Note: When gamma=0; FL reduces down to CE/BCE.")
+prsr.add_argument('--DSC_BD_LOSS_WEIGHTS', type=float, default=[0.50, 0.50],                                                          nargs='+', help="Soft Dice + Boundary Loss (weights)")
+prsr.add_argument('--ELBO_LOSS_PARAMS',    type=float, default=[10],                                                                  nargs='+', help="Evidence Lower Bound Loss for Prob Dist. (weight)")
+prsr.add_argument('--AUGM_PARAMS',         type=float, default=[1.00, 0.25, 0.15, 10.0, True, 1.20, 0.10, 0.025, True, [0.50, 1.50]], nargs='+', help="Train-Time Augmentations (M_PROB,TX_PROB,TRANS,ROT,HFLIP,SCALE,\
+                                                                                                                                                                                 NOISE,C_SHIFT,POOR_QUAL,GAMMA)")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 args, _ = prsr.parse_known_args()
 
