@@ -18,7 +18,7 @@ To infer lesion predictions on testing samples using the pre-trained variant [(a
 ● Key Python Packages: [`tf2.5/requirements.txt`](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/tf2.5/requirements.txt)  
 
 <kbd>![schematic](docs/image-1.png)</kbd>
-Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `M1`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, one sample `z ∈ Q` (train-time) or `z ∈ P` (test-time) is drawn to predict one segmentation mask `p`.
+Train-time schematic for the Bayesian/hierarchical probabilistic configuration of `M1`. `L_S` denotes the segmentation loss between prediction `p` and ground-truth `Y`. Additionally, `L_KL`, denoting the Kullback–Leibler divergence loss between prior distribution `P` and posterior distribution `Q`, is used at train-time (refer to [arXiv:1905.13077](https://arxiv.org/abs/1905.13077)). For each execution of the model, latent samples `z_i ∈ Q` (train-time) or `z_i ∈ P` (test-time) are successively drawn across at increasing scales of the model to predict one segmentation mask `p`.
 
 <kbd>![schematic](docs/image-2.png)</kbd>
 Architecture schematic of `M1`, with attention mechanisms and a nested decoder structure with deep supervision.
@@ -62,6 +62,7 @@ unet_model.fit(...)
 ```
 
 **If you use this repo or some part of its codebase, please cite the following articles (see [bibtex](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/docs/citations.bib)):**  
+  
   ● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
   Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
 
