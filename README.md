@@ -55,7 +55,7 @@ LR_SCHEDULE = (tf.keras.optimizers.schedules.CosineDecayRestarts(\
                                                   
 # Compile Model w/ Optimizer and Loss Function(s)
 unet_model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate=LR_SCHEDULE, amsgrad=True), 
-                   loss      = losses.Focal(alpha=0.75, gamma=2.00).loss)
+                   loss      = losses.Focal(alpha=[0.75, 0.25], gamma=2.00).loss)
 
 # Train Model
 unet_model.fit(...)
