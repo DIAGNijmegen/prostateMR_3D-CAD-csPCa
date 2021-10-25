@@ -67,7 +67,7 @@ unet_model.fit(...)
   Positive Reduction", Medical Image Analysis:102155.](https://doi.org/10.1016/j.media.2021.102155) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
 
   ● [A. Saha, M. Hosseinzadeh, H. Huisman (2020), "Encoding Clinical Priori in 3D Convolutional Neural Networks for Prostate Cancer Detection in bpMRI", Medical Imaging Meets
-  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouever, Canada.](https://arxiv.org/abs/2011.00263) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
+  NeurIPS Workshop – 34th Conference on Neural Information Processing Systems (NeurIPS), Vancouver, Canada.](https://arxiv.org/abs/2011.00263) [(architecture in commit 58b784f)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/58b784ffbd2e8c89139c6773cb9490b2fd53d814/tf2.5/models/networks.py)
 
 **Contact:** anindo@ieee.org; matin.hosseinzadeh@radboudumc.nl 
 
