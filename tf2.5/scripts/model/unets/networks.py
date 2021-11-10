@@ -47,6 +47,7 @@ class M1(LoadableModel):
                  kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                  bias_regularizer   =   tf.keras.regularizers.l2(1e-4),         
                  cascaded           =   False,
+                 dense_skip         =   False,
                  deep_supervision   =   False,
                  probabilistic      =   False,
                  prob_latent_dims   =  (3,2,1),
@@ -76,6 +77,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             dense_skip         = dense_skip,
                              deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              prob_latent_dims   = prob_latent_dims,
@@ -123,6 +125,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             dense_skip         = dense_skip,
                              deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              prob_latent_dims   = prob_latent_dims,
@@ -143,6 +146,7 @@ class M1(LoadableModel):
                              bias_initializer   = bias_initializer,     
                              kernel_regularizer = kernel_regularizer,    
                              bias_regularizer   = bias_regularizer,
+                             dense_skip         = dense_skip,                             
                              deep_supervision   = deep_supervision,
                              probabilistic      = probabilistic,
                              prob_latent_dims   = prob_latent_dims,
@@ -237,6 +241,7 @@ def m1(inputs, num_classes,
        bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),
        kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
        bias_regularizer   =   tf.keras.regularizers.l2(1e-4),
+       dense_skip         =   False,
        deep_supervision   =   False,
        probabilistic      =   False,
        prob_latent_dims   =  (1,1,1,1),
@@ -271,6 +276,7 @@ def m1(inputs, num_classes,
                              bias_initializer   =  bias_initializer,
                              kernel_regularizer =  kernel_regularizer,
                              bias_regularizer   =  bias_regularizer,
+                             dense_skip         =  dense_skip,
                              deep_supervision   =  deep_supervision,
                              probabilistic      =  probabilistic)(inputs=inputs)
 
@@ -307,6 +313,7 @@ def m1(inputs, num_classes,
                                   bias_initializer   =  bias_initializer,
                                   kernel_regularizer =  kernel_regularizer,
                                   bias_regularizer   =  bias_regularizer,
+                                  dense_skip         =  dense_skip,
                                   probabilistic      =  probabilistic,
                                   prob_latent_dims   =  prob_latent_dims)
 
@@ -323,6 +330,7 @@ def m1(inputs, num_classes,
                                   bias_initializer   =  bias_initializer,
                                   kernel_regularizer =  kernel_regularizer,
                                   bias_regularizer   =  bias_regularizer,
+                                  dense_skip         =  dense_skip,
                                   probabilistic      =  probabilistic,
                                   prob_latent_dims   =  prob_latent_dims)
 
@@ -420,6 +428,7 @@ class M1Core(snt.Module):
                  bias_initializer   =   tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),
                  kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                  bias_regularizer   =   tf.keras.regularizers.l2(1e-4),
+                 dense_skip         =   False,
                  deep_supervision   =   False,
                  probabilistic      =   False,
                  prob_latent_dims   =  (1,1,1,1)):
@@ -430,7 +439,7 @@ class M1Core(snt.Module):
         self.dropout_mode       = dropout_mode      
         self.dropout_rate       = dropout_rate      
         self.filters            = filters           
-        self.strides            = strides           
+        self.strides            = strides
         self.kernel_sizes       = kernel_sizes      
         self.se_reduction       = se_reduction      
         self.att_sub_samp       = att_sub_samp      
@@ -438,6 +447,7 @@ class M1Core(snt.Module):
         self.bias_initializer   = bias_initializer  
         self.kernel_regularizer = kernel_regularizer
         self.bias_regularizer   = bias_regularizer  
+        self.dense_skip         = dense_skip           
         self.deep_supervision   = deep_supervision  
         self.probabilistic      = probabilistic     
         self.prob_latent_dims   = prob_latent_dims          
@@ -481,7 +491,7 @@ class M1Core(snt.Module):
         self.att1   = GridAttentionBlock3D(inter_channels=self.filters[1], sub_samp=self.att_sub_samp[1], conv_params=self.conv_params)
         self.att2   = GridAttentionBlock3D(inter_channels=self.filters[2], sub_samp=self.att_sub_samp[2], conv_params=self.conv_params)
         self.att3   = GridAttentionBlock3D(inter_channels=self.filters[3], sub_samp=self.att_sub_samp[3], conv_params=self.conv_params)
-    
+        
         # Decoder: Nested U-Net - Stage 3
         self.convtd3     = tf.keras.layers.Conv3DTranspose(filters=self.filters[3], kernel_size=self.kernel_sizes[4], strides=self.strides[4], **self.conv_params)
         self.convtd3_up1 = tf.keras.layers.Conv3DTranspose(filters=self.filters[2], kernel_size=self.kernel_sizes[3], strides=self.strides[3], **self.conv_params)
@@ -578,30 +588,40 @@ class M1Core(snt.Module):
         self.att_conv3, att_3 = self.att3(conv_tensor=self.conv3, gating_tensor=self.convm)
     
         # Decoder: Nested U-Net - Stage 3
-        deconv3      = self.convtd3(self.convm)
-        deconv3_up1  = self.convtd3_up1(deconv3)
-        deconv3_up2  = self.convtd3_up2(deconv3_up1)
-        deconv3_up3  = self.convtd3_up3(deconv3_up2)
-        self.uconv3_ = tf.concat([deconv3, self.att_conv3], axis=-1)    
-        self.uconv3  = self.dropd3(self.sersd3(self.uconv3_))
+        deconv3          = self.convtd3(self.convm)
+        if self.dense_skip:
+            deconv3_up1  = self.convtd3_up1(deconv3)
+            deconv3_up2  = self.convtd3_up2(deconv3_up1)
+            deconv3_up3  = self.convtd3_up3(deconv3_up2)
+        self.uconv3_     = tf.concat([deconv3, self.att_conv3], axis=-1)    
+        self.uconv3      = self.dropd3(self.sersd3(self.uconv3_))
       
         # Decoder: Nested U-Net - Stage 2
-        deconv2      = self.convtd2(self.uconv3)
-        deconv2_up1  = self.convtd2_up1(deconv2)
-        deconv2_up2  = self.convtd2_up2(deconv2_up1)
-        self.uconv2_ = tf.concat([deconv2, deconv3_up1, self.att_conv2], axis=-1) 
-        self.uconv2  = self.dropd2(self.sersd2(self.uconv2_))
+        deconv2          = self.convtd2(self.uconv3)
+        if self.dense_skip:
+            deconv2_up1  = self.convtd2_up1(deconv2)
+            deconv2_up2  = self.convtd2_up2(deconv2_up1)
+            self.uconv2_ = tf.concat([deconv2, deconv3_up1, self.att_conv2], axis=-1) 
+        else:
+            self.uconv2_ = tf.concat([deconv2, self.att_conv2], axis=-1)             
+        self.uconv2      = self.dropd2(self.sersd2(self.uconv2_))
     
         # Decoder: Nested U-Net - Stage 1
-        deconv1      = self.convtd1(self.uconv2)
-        deconv1_up1  = self.convtd1_up1(deconv1)
-        self.uconv1_ = tf.concat([deconv1, deconv2_up1, deconv3_up2, self.att_conv1], axis=-1)
-        self.uconv1  = self.dropd1(self.sersd1(self.uconv1_))
+        deconv1          = self.convtd1(self.uconv2)
+        if self.dense_skip:
+            deconv1_up1  = self.convtd1_up1(deconv1)
+            self.uconv1_ = tf.concat([deconv1, deconv2_up1, deconv3_up2, self.att_conv1], axis=-1)
+        else:
+            self.uconv1_ = tf.concat([deconv1, self.att_conv1], axis=-1)            
+        self.uconv1      = self.dropd1(self.sersd1(self.uconv1_))
     
         # Decoder: Nested U-Net - Stage 0
-        deconv0      = self.convtd0(self.uconv1)
-        self.uconv0_ = tf.concat([deconv0, deconv1_up1, deconv2_up2, deconv3_up3, self.att_conv0], axis=-1)   
-        self.uconv0  = self.dropd0(self.sersd0(self.uconv0_))
+        deconv0          = self.convtd0(self.uconv1)
+        if self.dense_skip:
+            self.uconv0_ = tf.concat([deconv0, deconv1_up1, deconv2_up2, deconv3_up3, self.att_conv0], axis=-1)   
+        else:
+            self.uconv0_ = tf.concat([deconv0, self.att_conv0], axis=-1)   
+        self.uconv0      = self.dropd0(self.sersd0(self.uconv0_))
     
         # Final Convolutional Layer [Logits] + Softmax/Argmax
         self.y__     = self.logits(self.uconv0)

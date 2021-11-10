@@ -64,6 +64,7 @@ prsr.add_argument('--CACHE_TDS_PATH',             type=str,   default=None,     
 prsr.add_argument('--GPU_DEVICE_IDs',             type=str,   default="0",                                                                 help="Number of GPUs Available for Computation")
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # U-Net Hyperparameters
+prsr.add_argument('--UNET_DENSE_SKIP',            type=int,   default=0,                                                                   help="U-Net: Enable Dense Skip Connections (Ref:UNet++)")
 prsr.add_argument('--UNET_DEEP_SUPERVISION',      type=int,   default=0,                                                                   help="U-Net: Enable Deep Supervision")
 prsr.add_argument('--UNET_PROBABILISTIC',         type=int,   default=0,                                                                   help="U-Net: Enable Probabilistic/Bayesian Output Computation")
 prsr.add_argument('--UNET_PROBA_LATENT_DIMS',     type=int,   default=[3,2,1,0],                                                nargs='+', help="U-Net: Probabilistic Latent Dimensions at Each Resolution")
@@ -197,6 +198,7 @@ for f in args.FOLDS:
                                        att_sub_samp       = args.UNET_ATT_SUBSAMP,
                                        probabilistic      = bool(args.UNET_PROBABILISTIC),    
                                        prob_latent_dims   = args.UNET_PROBA_LATENT_DIMS,
+                                       dense_skip         = bool(args.UNET_DENSE_SKIP),                                       
                                        deep_supervision   = bool(args.UNET_DEEP_SUPERVISION), 
                                        summary            = bool(args.SHOW_SUMMARY),
                                        bias_initializer   = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.001),   

@@ -13,14 +13,12 @@ import cv2
 import tensorflow as tf
 
 '''
-Prostate Cancer Detection or Zonal Segmentation in MRI
+Prostate Cancer Segmentation in bpMRI
 Script:         Misc. Utilities
 Contributor:    anindox8
 Target Organ:   Prostate
-Target Classes: Task 1: Benign(0), Malignant(1)
-                Task 2: Whole-Gland(0), Transitional Zone(1),
-                        Peripheral Zone (2)
-Update:         03/10/2021
+Target Classes: Background(0), csPCa (1);
+Update:         09/11/2021
 
 '''
 
@@ -66,12 +64,18 @@ def print_overview(args):
     elif (args.TRAIN_OBJ=='lesion'): print("Training Objective: Diagnostic (csPCa) Segmentation")
     
     # Probabilistic Outputs 
-    if args.UNET_PROBABILISTIC:     print("Probabilistic Outputs: Enabled")
-    else:                           print("Probabilistic Outputs: Disabled")
+    if not bool(args.UNET_PROBABILISTIC): print("Probabilistic Outputs: Disabled")
+    else:                           
+        print("Probabilistic Outputs: Enabled")
+        print("Probabilistic Latent Dimensions: ", str(args.UNET_PROBA_LATENT_DIMS))
+
+    # Dense Skip Connections
+    if args.UNET_DENSE_SKIP:           print("Dense Skip Connections: Enabled")
+    else:                              print("Dense Skip Connections: Disabled")
 
     # Deep Supervision
-    if args.UNET_DEEP_SUPERVISION:  print("Deep Supervision: Enabled")
-    else:                           print("Deep Supervision: Disabled")
+    if args.UNET_DEEP_SUPERVISION:     print("Deep Supervision: Enabled")
+    else:                              print("Deep Supervision: Disabled")
 
     # Number of Classes at Train-Time
     if   (args.TRAIN_OBJ=='zonal'):    print("Number of Classes at Train-Time: 3")       
