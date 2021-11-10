@@ -44,6 +44,7 @@ unet_model = unets.networks.M1(\
                         kernel_regularizer =   tf.keras.regularizers.l2(1e-4),
                         bias_regularizer   =   tf.keras.regularizers.l2(1e-4),     
                         cascaded           =   False,
+                        dense_skip         =   True,
                         probabilistic      =   True,
                         deep_supervision   =   True,
                         summary            =   True)  
