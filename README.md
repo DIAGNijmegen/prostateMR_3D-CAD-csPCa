@@ -64,7 +64,7 @@ unet_model.fit(...)
 
 **If you use this repo or some part of its codebase, please cite the following articles (see [bibtex](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/main/docs/citations.bib)):**  
  
-  ● [A. Saha, J. Bosma, J. Linmans, M. Hosseinzadeh, H. Huisman (2021), "Anatomical and Diagnostic Bayesian Segmentation in Prostate MRI −Should Different Clinical Objectives Mandate Different Loss Functions?", Medical Imaging Meets
+  ● [A. Saha, J. S. Bosma, J. Linmans, M. Hosseinzadeh, H. Huisman (2021), "Anatomical and Diagnostic Bayesian Segmentation in Prostate MRI −Should Different Clinical Objectives Mandate Different Loss Functions?", Medical Imaging Meets
   NeurIPS Workshop – 35th Conference on Neural Information Processing Systems (NeurIPS), Sydney, Australia.](https://arxiv.org/abs/2110.12889) [(architecture in commit 914ec9d)](https://github.com/DIAGNijmegen/prostateMR_3D-CAD-csPCa/blob/914ec9db3c5ef4c44f371b82204d181a45bfc97d/tf2.5/models/networks.py)
   
   ● [A. Saha, M. Hosseinzadeh, H. Huisman (2021), "End-to-End Prostate Cancer Detection in bpMRI via 3D CNNs: Effect of Attention Mechanisms, Clinical Priori and Decoupled False
